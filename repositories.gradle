@@ -1,5 +1,27 @@
-// Add any additional repositories for your dependencies here.
-
+// 这里用来声明“额外的”依赖仓库，供下面的 dependencies 从 Maven 拉依赖时使用。
+//
+// 当前这个块是空的，这是对的，原因有三：
+//   1. 你的依赖全部是本地 jar（libs/Thaumcraft-deobf-...jar、libs/Baubles-deobf-...jar），
+//      走的是 files(...)，根本不需要任何 Maven 仓库。
+//   2. gradle.properties 里开了 includeWellKnownRepositories = true，
+//      GTNH 构建脚本已经自动加了 GTNH Maven、CurseMaven、Modrinth 等常用 1.7.10 仓库。
+//   3. 这个块只负责“额外的”仓库，不是主仓库列表；主仓库由模板和上面的开关负责。
+//
+// 什么情况下才需要在这里加东西：
+//   - 你要引入一个不在上述自动仓库里的 Maven 依赖（比如某个小众库、自己的私服）。
+//   - 示例写法（仅作参考，不要现在加）：
+//       maven {
+//           name = "SomeRepo"
+//           url = "https://example.com/maven"
+//       }
+//     需要认证时再加 credentials { username = ...; password = ... }。
+//
+// 注意事项：
+//   - 不要随手往里堆仓库：仓库越多，依赖解析越慢，也可能拉到同名但不对的构件。
+//   - 如果某个仓库只给某一个依赖用，优先用 Gradle 的 exclusiveContent / content 过滤，
+//     避免它去解析别的依赖。
+//   - 发布用的仓库（mavenPublishUrl）不在这里配，那个在 gradle.properties
+//     或 addon.gradle 的 publishing 块里。
 repositories {
 
 }

@@ -1,21 +1,21 @@
 {
-	"modListVersion": 2,
-	"modList": [{
-		"modid": "${modId}",
-		"name": "${modName}",
-		"description": "An example mod for Minecraft 1.7.10 with Forge focused on a stable setup.",
-		"version": "${modVersion}",
-		"mcversion": "${minecraftVersion}",
-		"url": "https://github.com/SinTh0r4s/MyMod",
-		"updateUrl": "",
-		"authorList": ["SinTho0r4s"],
-		"credits": "",
-		"logoFile": "",
-		"screenshots": [],
-		"parent": "",
-		"requiredMods": [],
-		"dependencies": [],
-		"dependants": [],
-		"useDependencyInformation": false
-	}]
+  "modListVersion": 2,
+  "modList": [{
+    "modid": "${modId}",
+    "name": "${modName}",
+    "description": "Thaumic Survival is a Thaumcraft addon heavily inspired by the legendary UHC Champions from Hypixel.\n\nIt introduces famous UHC artifacts and unique combat mechanics into the world of Thaumaturgy, bringing a breath of fresh air to magical survival. To speed up the gameplay, this mod features simplified alternative crafting recipes for various items, making resource gathering and item progression significantly easier.\n\nDesigned for combat enthusiasts, this mod focuses on providing intense, fast-paced PVP and hardcore survival combat experiences.",
+    "version": "${modVersion}",
+    "mcversion": "${minecraftVersion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": ["KongTai", "DeepSeekAI"],
+    "credits": "Dev: KongTai | AI: DeepSeekAI | Thanks: Thaumcraft Community",
+    "logoFile": "TSLOGO.png",
+    "screenshots": [],
+    "parent": "",
+    "requiredMods": ["Thaumcraft"],
+    "dependencies": [],
+    "dependants": [],
+    "useDependencyInformation": false
+  }]
 }

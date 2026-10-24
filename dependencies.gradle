@@ -1,38 +1,87 @@
 /*
- * Add your dependencies here. Supported configurations:
- *  - api("group:name:version:classifier"): if you use the types from this dependency in the public API of this mod
- *       Available at runtime and compiletime for mods depending on this mod
- *  - implementation("g:n:v:c"): if you need this for internal implementation details of the mod, but none of it is visible via the public API
- *       Available at runtime but not compiletime for mods depending on this mod
- *  - compileOnly("g:n:v:c"): if the mod you're building doesn't need this dependency during runtime at all, e.g. for optional mods
- *       Not available at all for mods depending on this mod, only visible at compiletime for this mod
- *  - compileOnlyApi("g:n:v:c"): like compileOnly, but also visible at compiletime for mods depending on this mod
- *       Available at compiletime but not runtime for mods depending on this mod
- *  - runtimeOnlyNonPublishable("g:n:v:c"): if you want to include a mod in this mod's runClient/runServer runs, but not publish it as a dependency
- *       Not available at all for mods depending on this mod, only visible at runtime for this mod
- *  - devOnlyNonPublishable("g:n:v:c"): a combination of runtimeOnlyNonPublishable and compileOnly for dependencies present at both compiletime and runtime,
- *       but not published as Maven dependencies - useful for RFG-deobfuscated dependencies or local testing
- *  - runtimeOnly("g:n:v:c"): if you don't need this at compile time, but want it to be present at runtime
- *       Available at runtime for mods depending on this mod
- *  - annotationProcessor("g:n:v:c"): mostly for java compiler plugins, if you know you need this, use it, otherwise don't worry
- *  - testCONFIG("g:n:v:c") - replace CONFIG by one of the above (except api), same as above but for the test sources instead of main
+ * 这里是模组依赖声明区。下面先解释各配置的含义，再放本项目实际使用的依赖。
  *
- *  - shadowImplementation("g:n:v:c"): effectively the same as API, but the dependency is included in your jar under a renamed package name
- *       Requires you to enable usesShadowedDependencies in gradle.properties
+ * 配置速查（本项目目前只用到 compile files，其余是给你以后加依赖时参考）：
  *
- *  - compile("g:n:v:c"): deprecated, replace with "api" (works like the old "compile") or "implementation" (can be more efficient)
+ *  - api("g:n:v:c")
+ *      依赖的类型会出现在本模组对外 API 的方法签名里时用。
+ *      下游模组在编译期和运行期都能看到它。
+ *      本项目没有对外 API，暂时用不到。
  *
- * You can exclude transitive dependencies (dependencies of the chosen dependency) by appending { transitive = false } if needed,
- * but use this sparingly as it can break using your mod as another mod's dependency if you're not careful.
+ *  - implementation("g:n:v:c")
+ *      仅本模组内部实现使用、不暴露给下游的类型用这个。
+ *      本模组运行期可见，下游编译期不可见。
+ *      本地 files(...) 依赖本质上也是这个效果（不会发布给下游）。
  *
- * To depend on obfuscated jars you can use `devOnlyNonPublishable(rfg.deobf("dep:spec:1.2.3"))` to fetch an obfuscated jar from maven,
- * or `devOnlyNonPublishable(rfg.deobf(project.files("libs/my-mod-jar.jar")))` to use a file.
+ *  - compileOnly("g:n:v:c")
+ *      编译期需要、运行期完全不需要的依赖（典型：可选模组的集成代码）。
+ *      本模组编译期可见，运行期不可见，也不会发布给下游。
  *
- * Gradle names for some of the configuration can be misleading, compileOnlyApi and runtimeOnly both get published as dependencies in Maven, but compileOnly does not.
- * The buildscript adds runtimeOnlyNonPublishable to also have a runtime dependency that's not published.
+ *  - compileOnlyApi("g:n:v:c")
+ *      类似 compileOnly，但下游模组编译期也能看到。
+ *      注意：它会被发布成 Maven 依赖，但运行期仍然不提供。
  *
- * For more details, see https://docs.gradle.org/8.0.1/userguide/java_library_plugin.html#sec:java_library_configurations_graph
+ *  - runtimeOnlyNonPublishable("g:n:v:c")
+ *      只想让 runClient/runServer 运行时里有这个模组，但不把它发布成依赖。
+ *      本模组运行期可见，编译期不可见，下游完全看不到。
+ *      适合“测试时想有 NEI，但代码不 import NEI 类”的情况。
+ *
+ *  - devOnlyNonPublishable("g:n:v:c")
+ *      runtimeOnlyNonPublishable + compileOnly 的组合：
+ *      编译期和运行期都可见，但不发布成 Maven 依赖。
+ *      适合 RFG 反混淆依赖或本地测试用。
+ *
+ *  - runtimeOnly("g:n:v:c")
+ *      编译期不需要、运行期需要，并且会作为运行期依赖发布给下游。
+ *
+ *  - annotationProcessor("g:n:v:c")
+ *      给 Java 编译期插件/注解处理器用的，不确定需要就别加。
+ *
+ *  - testCONFIG("g:n:v:c")
+ *      把上面的 CONFIG 换成具体配置名（api 除外），作用相同，但只作用于测试源码。
+ *
+ *  - shadowImplementation("g:n:v:c")
+ *      效果类似 api，但依赖会被重命名包名后打进你自己的 jar。
+ *      需要先在 gradle.properties 里打开 usesShadowedDependencies。
+ *      本项目没开 shadow，暂不使用。
+ *
+ *  - compile("g:n:v:c")
+ *      已弃用的旧写法。能用，但新代码建议换成 api 或 implementation。
+ *      本项目下面两行仍在用 compile files(...)，见行内说明。
+ *
+ * 排除传递依赖：在坐标后加 { transitive = false }。
+ * 慎用，排不好会让“别人把你的模组当依赖”时缺类。
+ *
+ * 依赖混淆 jar（obf jar）的写法：
+ *  - 从 Maven 拉：devOnlyNonPublishable(rfg.deobf("dep:spec:1.2.3"))
+ *  - 用本地文件：devOnlyNonPublishable(rfg.deobf(project.files("libs/my-mod-jar.jar")))
+ * 本项目用的是已经反混淆好的 -deobf- jar，所以不需要再套 rfg.deobf。
+ *
+ * 注意 Gradle 配置名有容易误解的地方：
+ * compileOnlyApi 和 runtimeOnly 都会作为依赖发布到 Maven，compileOnly 不会。
+ * 本构建脚本额外提供了 runtimeOnlyNonPublishable，用来表达“运行期有、但不发布”。
+ *
+ * 官方配置说明：
+ * https://docs.gradle.org/8.0.1/userguide/java_library_plugin.html#sec:java_library_configurations_graph
  */
 dependencies {
-    //runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.7.69-GTNH:dev")
+    // 神秘时代本体（已反混淆的本地 jar）。
+    // 用 files(...) 而不是 Maven 坐标：jar 放在项目 libs/ 下，不走仓库、不做传递依赖解析。
+    // compile 是旧配置名，效果约等于 implementation files(...)：
+    // 本模组编译期和运行期都可见，但不会作为 Maven 依赖发布给下游。
+    // 文件名、大小写、-deobf- 后缀必须和 libs/ 里的实际文件完全一致。
+    compile files('libs/Thaumcraft-deobf-1.7.10-4.2.3.5.jar')
+
+    // Baubles（TC4 的前置，同样是已反混淆的本地 jar）。
+    // 必须单独列出来：Gradle 不会从 Thaumcraft 的 jar 里自动解析出 Baubles。
+    // 版本 1.0.1.10 与上面的 TC 4.2.3.5 是常见搭配。
+    compile files('libs/Baubles-deobf-1.7.10-1.0.1.10.jar')
+    
+    // 可选：NEI。
+    // runtimeOnlyNonPublishable = 只在 runClient/runServer 运行时存在，
+    // 编译期看不到，也不发布给下游。适合“测试时想有 NEI，但代码不 import NEI 类”。
+    // 如果你要写 NEI 集成、代码里要 import NEI 的类，这行不够，
+    // 还需要再加一行 compileOnly(...)（或 devOnlyNonPublishable）提供编译期可见性。
+    // NEI 的 :dev 分类器本身就是 deobf 的，不需要再套 rfg.deobf。
+    // runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.7.69-GTNH:dev")
 }
