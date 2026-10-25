@@ -17,7 +17,7 @@
 -->
 
 
-[ThaumicSurvival-0.2-beta] - 承前启后 - 2026-10-25
+# 📦 [ThaumicSurvival-0.2-beta] - 承前启后 - 2026-10-25-00:32:43
 🚀 新增 (Added)
 (本版本暂无新增物品)
 
@@ -41,7 +41,11 @@ UI 与素材更新：修改了魔导书背景贴图、界面 UI 以及相关的 
 📖 文本完善：进一步调整语言文件与文本描述。
 
 
-[ThaumicSurvival-0.1-beta] - 开天辟地 - 2026-10-24
+
+
+
+
+# 📦 [ThaumicSurvival-0.1-beta] - 开天辟地 - 2026-10-24-02:32:43
 
 🚀 新增 (Added)
 新增独立的底层 API 体系：包括 TCItems、TCBlocks、TCAspects 等七大工具类词典，彻底告别反人类的 meta 值调用！
