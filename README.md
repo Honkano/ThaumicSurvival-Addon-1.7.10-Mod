@@ -103,3 +103,56 @@ We have heavily simplified the original Thaumcraft 4 API to make your life easie
 
 ---
 *“魔法不是用来种田的，是用来在奥术工作台里打架的。” —— 空太*
+
+---
+A Lost Chapter from the Thaumonomicon
+《魔导手册》失落的一页
+
+EN:
+Long before the first block was ever placed, an ancient Thaumaturge known only as the "First Scholar" foresaw the end. Not of the world, but of a world—a final, brutal arena where the only law was survival. He recorded his findings in a forbidden chapter of the Thaumonomicon, a chapter so dangerous that it was torn from the book and scattered across the void.
+
+ZH:
+在第一个方块被放置之前，一位只被称作“初代学者”的古代神秘使预见到了终局。那不是世界的终结，而是一个世界的终结——一个最终极、最残酷的竞技场，在那里，唯一的法则就是生存。他将发现记录在《魔导手册》的禁忌章节中，这章内容太过危险，以至于被从书中撕下，散落在了虚空之中。
+
+EN:
+Those who found the fragments spoke of a ritual. The "Champions' Trial." When the ancient runes were activated, the sky would darken, and the earth itself would become a cage. Resources would be scarce. Health would no longer regenerate naturally; the only salvation lay in the golden apples, infused with raw, unstable magical energy—the Greedy Golden Apples, each tier offering greater power at a far more terrible cost in warp and instability. To consume one was to gamble with your own mind.
+
+ZH:
+找到碎片的人提到了一个仪式：“冠军试炼”。当古老的符文被激活，天空会变暗，大地本身会变成牢笼。资源会变得稀缺。生命不再自然恢复；唯一的救赎，寄托在那些灌注了原始、不稳定魔法能量的金苹果上——魔铸金苹果，每一阶都提供更强大的力量，但也伴随着更可怕的不稳定与扭曲代价。吃下它，就是拿自己的心智做赌注。
+
+EN:
+But the true prize was never survival. It was the Artifacts—weapons of myth, reforged in the fires of the Infusion Altar. The Dragon's Cleaver, a blade that could sever the bond between a soul and its armor. Caliburn, the golden sword of kings, said to choose its wielder not by bloodline, but by the weight of their sins. And the Thunderfall Axe, whose every strike summoned a storm that answered only to its master. These were not weapons. They were the keys to the Trial's end.
+
+ZH:
+但真正的奖赏从来不是生存。而是那些神器——在注魔祭坛的烈火中重铸的神话武器。巨龙之斧，一柄能斩断灵魂与盔甲之间联系的重刃。咖喱棒，王者之金剑，据说它选择主人不看血统，而看其罪孽的重量。还有雷霆之斧，每一次挥击都会召唤一场只回应其主人的风暴。这些不是武器，它们是终结试炼的钥匙。
+
+EN:
+The Trial has been played a thousand times across a thousand worlds. Champions have risen, and Champions have fallen, their heads consumed by the victor in a final, desperate act of survival. The arena always resets. The Artifacts always return to the Altar, waiting to be reforged. The cycle is eternal, and the Thaumonomicon chapter remains lost—until now.
+
+ZH:
+试炼已在千百个世界中上演了千百次。冠军崛起，冠军陨落，他们的头颅被胜者在最后绝望的求生之举中吞下。竞技场总会重置。神器总会回到祭坛，等待被再次重铸。这个循环是永恒的，而《魔导手册》的那一章也一直失落——直到现在。
+
+EN:
+A lone player, known only as Steve, was mining in the deep dark of a world long abandoned by its Champions. He found no diamonds, no ancient debris. Instead, his pickaxe struck something that hummed with a faint, lingering magic. It was a book. Not the Thaumonomicon itself, but a single, leather-bound chapter, its pages stained with the residue of a thousand desperate battles. The runes on the cover were barely legible, but one word pulsed with a dull, angry light: “CHAMPIONS.”
+
+ZH:
+一位只被称作史蒂夫的孤独玩家，在一个早已被冠军们遗弃的世界的幽暗深处挖矿。他没有找到钻石，也没有找到远古残骸。他的镐子敲到了某个东西，正散发着微弱、萦绕不散的魔法嗡鸣。那是一本书。不是《魔导手册》本身，而是单独的一章，皮革装订，书页上沾满了上千场绝望战斗的残留物。封面上的如尼文字几乎无法辨认，但有一个词正随着暗淡、愤怒的光芒脉动：“冠军”。
+
+EN:
+Steve opened the book. The first page contained a map—not of his world, but of an arena. A countdown had already begun. He could hear the distant, metallic sound of an Infusion Altar powering up, and the faint, hungry whispers of an ancient, waiting crowd.
+
+He looked at the first recipe. It was for a simple iron anvil. The materials were listed: one iron block, three iron ingots.
+
+But there was a footnote, written in a different hand, a hand that had won before.
+
+“The Trial has already begun, Steve. The first artifact is waiting. And this time, the Champions are real.”
+
+ZH:
+史蒂夫翻开了书。第一页是一张地图——不是他这个世界的地图，而是一个竞技场的地图。倒计时已经开始了。他能听到远处注魔祭坛启动时金属般的嗡鸣，以及一个古老、等待已久的群体发出的微弱而饥渴的低语。
+
+他看向第一个配方。那是一个简易铁砧。材料清单上写着：一个铁块，三个铁锭。
+
+但旁边有一行脚注，是用另一种笔迹写的——一种曾经赢过的笔迹。
+
+“试炼已经开始了，史蒂夫。第一件神器正在等待。而这一次，冠军们是真的。”
+---

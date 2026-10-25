@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>空太的 TC4 研究树画布 (连线版)</title>
+    <style>
+        body { margin: 0; background-color: #1e142b; color: white; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; }
+        #canvas { position: relative; width: 100vw; height: 100vh; overflow: hidden; 
+                  background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px); 
+                  background-size: 50px 50px; }
+        
+        /* 节点样式 */
+        .node { position: absolute; width: 70px; height: 70px; background-color: #3e2a59; border: 3px solid #a988d9; border-radius: 50%; 
+                display: flex; flex-direction: column; align-items: center; justify-content: center; 
+                cursor: pointer; user-select: none; transform: translate(-50%, -50%); 
+                box-shadow: 0 0 10px rgba(169, 136, 217, 0.3); transition: all 0.2s; z-index: 10; }
+        .node:hover { transform: translate(-50%, -50%) scale(1.1); border-color: #ffd700; }
+        .node.selected { border-color: #ffd700; box-shadow: 0 0 20px #ffd700; }
+        .node .name { font-size: 12px; font-weight: bold; text-align: center; padding: 2px; pointer-events: none; word-break: break-all; }
+        .node .coord { font-size: 11px; color: #00ffcc; position: absolute; bottom: -25px; white-space: nowrap; 
+                       background: rgba(0,0,0,0.6); padding: 2px 5px; border-radius: 3px; pointer-events: none; }
+        
+        /* 工具栏 */
+        #toolbar { position: absolute; top: 15px; left: 15px; background: rgba(30, 20, 43, 0.9); border: 1px solid #5d4b78; 
+                   padding: 15px; border-radius: 8px; z-index: 100; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+        button { background: #5d4b78; color: white; border: 1px solid #a988d9; padding: 8px 12px; 
+                 margin: 5px 5px 5px 0; cursor: pointer; border-radius: 4px; font-weight: bold; transition: 0.2s; }
+        button:hover { background: #a988d9; color: #1e142b; }
+        button.active { background: #ffd700; color: #000; border-color: #ffd700; }
+        
+        /* 画线画布 */
+        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        path { fill: none; stroke: #5d4b78; stroke-width: 3; transition: stroke 0.3s; }
+        path:hover { stroke: #ffd700; }
+    </style>
+</head>
+<body>
+
+<div id="toolbar">
+    <h3 style="margin-top:0; color:#a988d9;">TC4 研究树可视化</h3>
+    <button id="btnMove" class="active" onclick="setMode('move')">✋ 拖拽/新建 模式</button>
+    <button id="btnLink" onclick="setMode('link')">🔗 连线 模式</button>
+    <button onclick="clearAll()" style="background:#8b2e2e; border-color:#ff5555;">🗑️ 清空画布</button>
+    <button onclick="exportData()" style="background:#2e6b47; border-color:#55ff88;">📥 导出坐标</button>
+    <br><br>
+    <span style="font-size:12px; color:#ccc;">
+        <b>操作：</b>双击空白建节点 | 双击节点改名<br>
+        右键点击节点/连线可删除<br>
+        <span style="color:#ffd700;">拖拽模式</span>：移动节点。<br>
+        <span style="color:#ffd700;">连线模式</span>：点A再点B，即可连线。
+    </span>
+</div>
+
+<div id="canvas">
+    <svg id="svg-layer"></svg>
+</div>
+
+<script>
+    let mode = 'move'; // 'move' 或 'link'
+    let nodes = []; 
+    let links = [];
+    let nodeIdCounter = 0;
+    let linkIdCounter = 0;
+    
+    let isPanning = false;
+    let panStartX = 0, panStartY = 0;
+    let panX = window.innerWidth / 2;
+    let panY = window.innerHeight / 2;
+    
+    let draggedNode = null;
+    let linkStartNode = null; // 连线起点
+
+    const canvas = document.getElementById('canvas');
+    const svg = document.getElementById('svg-layer');
+
+    // 切换模式
+    function setMode(newMode) {
+        mode = newMode;
+        document.getElementById('btnMove').classList.toggle('active', mode === 'move');
+        document.getElementById('btnLink').classList.toggle('active', mode === 'link');
+        
+        // 取消所有选中状态
+        nodes.forEach(n => n.el.classList.remove('selected'));
+        linkStartNode = null;
+    }
+
+    // 画布平移
+    canvas.addEventListener('mousedown', (e) => {
+        if (e.target === canvas || e.target === svg) {
+            isPanning = true;
+            panStartX = e.clientX - panX;
+            panStartY = e.clientY - panY;
+        }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (isPanning) {
+            panX = e.clientX - panStartX;
+            panY = e.clientY - panStartY;
+            render();
+        }
+        if (draggedNode) {
+            let rawX = (e.clientX - panX) / 50;
+            let rawY = (e.clientY - panY) / 50;
+            draggedNode.x = Math.round(rawX);
+            draggedNode.y = Math.round(rawY);
+            render();
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        isPanning = false;
+        draggedNode = null;
+    });
+
+    // 双击创建节点
+    canvas.addEventListener('dblclick', (e) => {
+        if (mode !== 'move' || (e.target !== canvas && e.target !== svg)) return;
+        
+        let rawX = (e.clientX - panX) / 50;
+        let rawY = (e.clientY - panY) / 50;
+        
+        let name = prompt("输入节点名字 (随便写，自己认得就行):", "新节点");
+        if (!name) return;
+
+        createNode(Math.round(rawX), Math.round(rawY), name);
+    });
+
+    // 创建节点逻辑
+    function createNode(x, y, name) {
+        let el = document.createElement('div');
+        el.className = 'node';
+        el.innerHTML = `<div class="name">${name}</div><div class="coord"></div>`;
+        
+        let node = { id: nodeIdCounter++, x: x, y: y, name: name, el: el };
+        nodes.push(node);
+        
+        // 拖拽或连线
+        el.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            if (mode === 'move') {
+                draggedNode = node;
+            } else if (mode === 'link') {
+                if (!linkStartNode) {
+                    linkStartNode = node;
+                    el.classList.add('selected');
+                } else if (linkStartNode !== node) {
+                    createLink(linkStartNode, node);
+                    linkStartNode.el.classList.remove('selected');
+                    linkStartNode = null;
+                }
+            }
+        });
+
+        // 双击改名
+        el.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            let newName = prompt("修改名字:", node.name);
+            if (newName) {
+                node.name = newName;
+                el.querySelector('.name').innerText = newName;
+            }
+        });
+
+        // 右键删除节点
+        el.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (confirm(`删除节点 "${node.name}" 吗？`)) {
+                // 删除关联的线
+                links = links.filter(l => {
+                    if (l.from === node.id || l.to === node.id) {
+                        l.el.remove();
+                        return false;
+                    }
+                    return true;
+                });
+                // 删除节点
+                el.remove();
+                nodes = nodes.filter(n => n.id !== node.id);
+                render();
+            }
+        });
+
+        canvas.appendChild(el);
+        render();
+    }
+
+    // 创建连线
+    function createLink(fromNode, toNode) {
+        // 检查线是否已存在
+        if (links.some(l => l.from === fromNode.id && l.to === toNode.id)) return;
+
+        let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        svg.appendChild(path);
+        
+        let link = { id: linkIdCounter++, from: fromNode.id, to: toNode.id, el: path };
+        links.push(link);
+
+        // 右键删除线
+        path.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (confirm("删除这条连线吗？")) {
+                path.remove();
+                links = links.filter(l => l.id !== link.id);
+            }
+        });
+
+        render();
+    }
+
+    // 核心渲染函数
+    function render() {
+        // 1. 渲染节点位置
+        nodes.forEach(n => {
+            let screenX = panX + (n.x * 50);
+            let screenY = panY + (n.y * 50);
+            n.el.style.left = screenX + 'px';
+            n.el.style.top = screenY + 'px';
+            // 注意：这里显示的就是 TC4 的直接坐标！
+            n.el.querySelector('.coord').innerText = `X:${n.x}, Y:${n.y}`;
+        });
+
+        // 2. 渲染连线 (贝塞尔曲线，更优雅)
+        links.forEach(l => {
+            let fromN = nodes.find(n => n.id === l.from);
+            let toN = nodes.find(n => n.id === l.to);
+            if (!fromN || !toN) return;
+
+            let x1 = panX + (fromN.x * 50);
+            let y1 = panY + (fromN.y * 50);
+            let x2 = panX + (toN.x * 50);
+            let y2 = panY + (toN.y * 50);
+
+            // 简单的曲线计算，如果想要直线可以直接用 `M x1 y1 L x2 y2`
+            l.el.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+        });
+    }
+
+    function clearAll() {
+        if (!confirm("确定要清空所有节点和连线吗？")) return;
+        nodes.forEach(n => n.el.remove());
+        links.forEach(l => l.el.remove());
+        nodes = [];
+        links = [];
+        panX = window.innerWidth / 2;
+        panY = window.innerHeight / 2;
+        render();
+    }
+
+    function exportData() {
+        let out = "// === 节点坐标列表 ===\n";
+        nodes.forEach(n => {
+            out += `${n.name} => X: ${n.x}, Y: ${n.y}\n`;
+        });
+        
+        out += "\n// === 连线关系 (谁连谁) ===\n";
+        links.forEach(l => {
+            let from = nodes.find(n => n.id === l.from).name;
+            let to = nodes.find(n => n.id === l.to).name;
+            out += `${from} --> ${to}\n`;
+        });
+        
+        console.log(out);
+        alert("数据已导出！请按 F12 打开控制台 (Console) 查看复制。");
+    }
+</script>
+</body>
+</html>
