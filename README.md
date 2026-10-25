@@ -1,5 +1,11 @@
-# ThaumicSurvival Addon (神秘生存学)
+# ThaumicSurvival Addon (神秘生存学) 1.7.10 Forge
 
+---
+<p align="center">
+  <img src="ThaumicSurvivalMODLOGO.png?raw=true" alt="Thaumic Survival Logo" width="1000">
+</p>
+
+---
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.7.10-blue.svg)](https://www.minecraft.net/)
 [![Thaumcraft](https://img.shields.io/badge/Thaumcraft-4.2.3.5-purple.svg)](https://www.curseforge.com/minecraft/mc-mods/thaumcraft)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)

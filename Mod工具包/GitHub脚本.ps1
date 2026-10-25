@@ -5,6 +5,30 @@ function Test-GitRepo {
     return (Test-Path ".git")
 }
 
+# ============ 新增：检测 gh 是否就绪（不安装也不影响 [6] 原模式）============
+function Test-GhReady {
+    $gh = Get-Command gh -ErrorAction SilentlyContinue
+    if (-not $gh) {
+        Write-Host ""
+        Write-Host "? 未检测到 GitHub CLI (gh)，无法自动创建 Release。" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "如需使用此模式，请先安装并登录（只需一次）：" -ForegroundColor Yellow
+        Write-Host "  1) 安装：winget install --id GitHub.cli" -ForegroundColor DarkGray
+        Write-Host "  2) 登录：gh auth login" -ForegroundColor DarkGray
+        Write-Host ""
+        Write-Host "提示：不安装也不影响 [6] 的 [1] 原模式（只打标签推送）。" -ForegroundColor DarkGray
+        return $false
+    }
+    gh auth status 2>$null | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host ""
+        Write-Host "? gh 已安装但未登录。" -ForegroundColor Red
+        Write-Host "  请先在终端执行：gh auth login" -ForegroundColor DarkGray
+        return $false
+    }
+    return $true
+}
+
 function Get-RepoStatus {
     if (-not (Test-GitRepo)) { return "当前目录不是 Git 仓库" }
     $branch = git rev-parse --abbrev-ref HEAD 2>$null
@@ -27,13 +51,14 @@ function Show-Menu {
     Write-Host " [3] 拉取远程更新（别人改了仓库，或你在别的电脑改了）" -ForegroundColor Green
     Write-Host " [4] 查看当前状态（改了哪些文件、最近提交记录）" -ForegroundColor Gray
     Write-Host " [5] 生成/更新 .gitignore（Minecraft 项目专用）" -ForegroundColor Gray
-    Write-Host " [6] 打版本标签并推送（发布用，如 v1.0.0）" -ForegroundColor Magenta
+    Write-Host " [6] 打版本标签并推送（可选：同时自动创建 Release 上传 jar）" -ForegroundColor Magenta
     Write-Host " [7] 新建/切换分支" -ForegroundColor Magenta
     Write-Host " [8] 撤销最近一次提交（保留改动，仅撤销 commit）" -ForegroundColor Red
     Write-Host " [9] 彻底放弃本地改动（危险，需二次确认）" -ForegroundColor Red
     Write-Host " [10] 查看/修改远程地址" -ForegroundColor Gray
     Write-Host " [11] 用浏览器打开 GitHub 仓库页面" -ForegroundColor Gray
     Write-Host " [12] 检查 Git 环境（是否安装、是否配置用户名邮箱）" -ForegroundColor Gray
+    Write-Host " [13] 更多工具（小抽屉：Release 管理、日志、清理分支等）" -ForegroundColor DarkCyan
     Write-Host " [q] 退出" -ForegroundColor Cyan
     Write-Host "==================================================================" -ForegroundColor Cyan
 }
@@ -250,10 +275,35 @@ function Do-Gitignore {
     Read-Host "按回车返回" | Out-Null
 }
 
+# ============ [6] 打版本标签（双模式）============
 function Do-Tag {
     if (-not (Require-Repo)) { return }
+
     Write-Host ""
     Write-Host "=== 打版本标签 ===" -ForegroundColor Cyan
+    Write-Host " [1] 仅打标签并推送（原模式，默认）" -ForegroundColor Yellow
+    Write-Host " [2] 打标签 + 自动创建 Release 并上传 jar（需要 GitHub CLI）" -ForegroundColor Magenta
+    Write-Host " [q] 返回" -ForegroundColor Gray
+    $mode = Read-Host "选择模式（直接回车 = 1）"
+    if ([string]::IsNullOrWhiteSpace($mode)) { $mode = "1" }
+    $mode = $mode.Trim()
+
+    if ($mode -eq "q") { return }
+    if ($mode -ne "1" -and $mode -ne "2") {
+        Write-Host "输入无效，返回。" -ForegroundColor Red
+        Read-Host "按回车返回" | Out-Null
+        return
+    }
+
+    # 选模式 2 先检测 gh，没装就提示并返回（不破坏任何东西）
+    if ($mode -eq "2") {
+        if (-not (Test-GhReady)) {
+            Read-Host "按回车返回" | Out-Null
+            return
+        }
+    }
+
+    Write-Host ""
     Write-Host "当前已有标签（最近5个）：" -ForegroundColor DarkGray
     git tag --sort=-creatordate | Select-Object -First 5
     Write-Host ""
@@ -267,10 +317,125 @@ function Do-Tag {
     }
     Write-Host "→ git push origin $tag" -ForegroundColor Yellow
     git push origin "$tag"
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "? 标签已推送。去 GitHub Releases 页面可基于此标签发布版本。" -ForegroundColor Green
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "? 标签推送失败，Release 未创建。" -ForegroundColor Red
+        Read-Host "按回车返回" | Out-Null
+        return
     }
+    Write-Host "? 标签已推送。" -ForegroundColor Green
+
+    # ---------- 原模式到此结束 ----------
+    if ($mode -eq "1") {
+        Write-Host "去 GitHub Releases 页面可基于此标签发布版本。" -ForegroundColor Green
+        Read-Host "按回车返回" | Out-Null
+        return
+    }
+
+    # ---------- 新模式：创建 Release 并上传 jar ----------
+    Invoke-CreateRelease -Tag $tag
     Read-Host "按回车返回" | Out-Null
+}
+
+# ============ 新增：创建 Release 的辅助函数 ============
+function Invoke-CreateRelease {
+    param([string]$Tag)
+
+    Write-Host ""
+    Write-Host "=== 创建 GitHub Release ===" -ForegroundColor Cyan
+
+    # 找主产物 jar
+    Write-Host "正在查找 build/libs/ 下的主产物 jar..." -ForegroundColor DarkGray
+    $jars = @()
+    if (Test-Path "build/libs") {
+        $jars = @(Get-ChildItem "build/libs" -Filter "*.jar" -File |
+            Where-Object { $_.Name -notmatch '-(sources|dev|javadoc)\.jar$' })
+    }
+    if ($jars.Count -eq 0) {
+        Write-Host "? 未找到合适的 jar（已排除 -sources / -dev / -javadoc）。" -ForegroundColor Yellow
+        $ans = Read-Host "是否继续创建不含附件的 Release？(y/N)"
+        if ($ans -ne "y") { return }
+    } else {
+        Write-Host "找到以下 jar：" -ForegroundColor Gray
+        $jars | ForEach-Object { Write-Host "  - $($_.Name)" -ForegroundColor DarkGray }
+    }
+
+    # 发布说明
+    Write-Host ""
+    Write-Host "--- 发布说明 ---" -ForegroundColor Cyan
+    Write-Host " [1] 手写多行说明（空行结束）" -ForegroundColor Gray
+    Write-Host " [2] 从文件读取（.md / .txt）" -ForegroundColor Gray
+    Write-Host " [g] 自动生成 + 手写前缀（留空前缀则纯自动生成）" -ForegroundColor Gray
+    Write-Host " [直接回车] 完全留空，由 GitHub 自动生成" -ForegroundColor Gray
+    $noteMode = Read-Host "选择"
+    $notes = ""
+    $notesFile = $null
+    $autoNotes = $false
+
+    switch ($noteMode.Trim().ToLower()) {
+        "1" {
+            Write-Host "逐行输入，空行结束：" -ForegroundColor DarkGray
+            $lines = @()
+            while ($true) {
+                $l = Read-Host
+                if ([string]::IsNullOrWhiteSpace($l)) { break }
+                $lines += $l
+            }
+            $notes = $lines -join "`n"
+        }
+        "2" {
+            $path = Read-Host "输入文件路径"
+            if ((-not [string]::IsNullOrWhiteSpace($path)) -and (Test-Path $path)) {
+                $notesFile = (Resolve-Path $path).Path
+                Write-Host "→ 将从 $notesFile 读取发布说明" -ForegroundColor Gray
+            } else {
+                Write-Host "? 文件不存在，改为自动生成。" -ForegroundColor Red
+                $autoNotes = $true
+            }
+        }
+        "g" {
+            $autoNotes = $true
+            Write-Host "输入前缀（空行结束，留空则纯自动生成）：" -ForegroundColor DarkGray
+            $lines = @()
+            while ($true) {
+                $l = Read-Host
+                if ([string]::IsNullOrWhiteSpace($l)) { break }
+                $lines += $l
+            }
+            $notes = $lines -join "`n"
+        }
+        default {
+            $autoNotes = $true
+        }
+    }
+
+    $title = Read-Host "Release 标题（直接回车默认: $Tag）"
+    if ([string]::IsNullOrWhiteSpace($title)) { $title = $Tag }
+
+    $ghArgs = @("release", "create", $Tag, "--title", $title)
+    if ($jars.Count -gt 0) { $ghArgs += $jars.FullName }
+    if ($autoNotes) { $ghArgs += "--generate-notes" }
+    if ($notesFile) {
+        $ghArgs += @("--notes-file", $notesFile)
+    } elseif (-not [string]::IsNullOrWhiteSpace($notes)) {
+        $ghArgs += @("--notes", $notes)
+    }
+
+    Write-Host ""
+    Write-Host "→ gh release create $Tag ..." -ForegroundColor Yellow
+    & gh @ghArgs
+
+    if ($LASTEXITCODE -eq 0) {
+        $repoUrl = git remote get-url origin 2>$null
+        $repoUrl = $repoUrl -replace '\.git$', '' -replace '^git@github\.com:', 'https://github.com/'
+        Write-Host ""
+        Write-Host "? Release 已发布：$repoUrl/releases/tag/$Tag" -ForegroundColor Green
+        $open = Read-Host "是否用浏览器打开 Release 页面？(y/N)"
+        if ($open -eq "y") { Start-Process "$repoUrl/releases/tag/$Tag" }
+    } else {
+        Write-Host ""
+        Write-Host "? Release 创建失败。常见原因：同标签 Release 已存在、jar 路径含特殊字符。" -ForegroundColor Red
+        Write-Host "  排查：gh release view $Tag   或   gh auth status" -ForegroundColor DarkGray
+    }
 }
 
 function Do-Branch {
@@ -391,7 +556,86 @@ function Do-CheckEnv {
         Write-Host "! 未配置 credential.helper，push 时可能反复要求输入密码。" -ForegroundColor Yellow
         Write-Host "  推荐执行：git config --global credential.helper manager" -ForegroundColor DarkGray
     }
+
+    # 顺手报一下 gh 状态（不影响原有流程）
+    $gh = Get-Command gh -ErrorAction SilentlyContinue
+    if ($gh) {
+        Write-Host "? gh 已安装：$(& gh --version 2>$null | Select-Object -First 1)" -ForegroundColor Green
+    } else {
+        Write-Host "! 未安装 gh（可选，[6] 的新模式需要）。安装：winget install --id GitHub.cli" -ForegroundColor Yellow
+    }
     Read-Host "按回车返回" | Out-Null
+}
+
+# ============ [13] 小抽屉：不常用但好用的工具 ============
+function Do-ToolDrawer {
+    Clear-Host
+    Write-Host "=== 更多工具（小抽屉）===" -ForegroundColor DarkCyan
+    Write-Host " [1] 查看/管理 Release（列表、删除、上传额外文件，需要 gh）" -ForegroundColor Gray
+    Write-Host " [2] 查看提交日志（最近 20 条，带图）" -ForegroundColor Gray
+    Write-Host " [3] 清理已合并的本地分支" -ForegroundColor Gray
+    Write-Host " [4] 查看 jar 产物列表（build/libs/）" -ForegroundColor Gray
+    Write-Host " [5] Git 仓库优化（gc + 统计信息）" -ForegroundColor Gray
+    Write-Host " [q] 返回主菜单" -ForegroundColor Cyan
+    $c = Read-Host "选择"
+
+    switch ($c) {
+        "1" {
+            if (-not (Require-Repo)) { return }
+            if (-not (Test-GhReady)) { Read-Host "按回车返回" | Out-Null; return }
+            Write-Host ""
+            Write-Host "--- 最近 Release ---" -ForegroundColor DarkGray
+            gh release list 2>$null
+            Write-Host ""
+            $sub = Read-Host "[d] 删除某个 Release / [u] 上传额外文件 / 回车返回"
+            if ($sub -eq "d") {
+                $t = Read-Host "要删除的标签（会同时删除 Release 和标签）"
+                if (-not [string]::IsNullOrWhiteSpace($t)) {
+                    if (Confirm-Danger "删除 Release 和标签 $t") {
+                        gh release delete "$t" --yes --cleanup-tag
+                    }
+                }
+            } elseif ($sub -eq "u") {
+                $t = Read-Host "目标标签"
+                $f = Read-Host "要上传的文件路径（可多个，空格分隔）"
+                if ($t -and $f) { gh release upload "$t" $f --clobber }
+            }
+            Read-Host "按回车返回" | Out-Null
+        }
+        "2" {
+            if (-not (Require-Repo)) { return }
+            git log --oneline --graph --decorate -20
+            Read-Host "按回车返回" | Out-Null
+        }
+        "3" {
+            if (-not (Require-Repo)) { return }
+            Write-Host "已合并到当前分支的本地分支：" -ForegroundColor DarkGray
+            git branch --merged | Where-Object { $_ -notmatch '^\*' }
+            $b = Read-Host "输入要删除的分支名（可多个，空格分隔，回车取消）"
+            if (-not [string]::IsNullOrWhiteSpace($b)) {
+                git branch -d $b.Split(" ")
+            }
+            Read-Host "按回车返回" | Out-Null
+        }
+        "4" {
+            if (Test-Path "build/libs") {
+                Get-ChildItem "build/libs" -Filter "*.jar" -File |
+                    Select-Object Name, @{N="大小(MB)";E={[math]::Round($_.Length/1MB,2)}}, LastWriteTime |
+                    Format-Table -AutoSize
+            } else {
+                Write-Host "build/libs/ 不存在，请先 build。" -ForegroundColor Red
+            }
+            Read-Host "按回车返回" | Out-Null
+        }
+        "5" {
+            if (-not (Require-Repo)) { return }
+            Write-Host "→ git gc --aggressive --prune=now" -ForegroundColor Yellow
+            git gc --aggressive --prune=now
+            Write-Host "→ 仓库统计" -ForegroundColor Yellow
+            git count-objects -vH
+            Read-Host "按回车返回" | Out-Null
+        }
+    }
 }
 
 # ============ 主循环 ============
@@ -416,8 +660,9 @@ while ($true) {
         "10" { Do-Remote }
         "11" { Do-OpenBrowser }
         "12" { Do-CheckEnv }
+        "13" { Do-ToolDrawer }
         "q"  { Write-Host "已退出。" -ForegroundColor Yellow; break }
-        default { Write-Host "输入无效，请输入 1-12 或 q" -ForegroundColor Red }
+        default { Write-Host "输入无效，请输入 1-13 或 q" -ForegroundColor Red }
     }
     if ($choice -eq "q") { break }
     Show-Menu

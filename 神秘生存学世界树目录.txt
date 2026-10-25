@@ -1,0 +1,53 @@
+﻿目录树: C:\Users\Administrator\Desktop\工作库\空太工作库\ThaumicSurvival\src
+生成时间: 2026-10-25 19:02:42
+============================================================
+└── main/
+    ├── resources/
+    │   ├── assets/
+    │   │   └── thaumicsurvival/
+    │   │       ├── textures/
+    │   │       │   └── items/
+    │   │       │       └── golden_apple_icon.png
+    │   │       └── lang/
+    │   │           └── zh_CN.lang
+    │   ├── TSLOGO.png
+    │   └── mcmod.info
+    └── java/
+        └── com/
+            └── kongtai/
+                └── thaumicsurvival/
+                    ├── thaumcraftwork/
+                    │   ├── research/
+                    │   │   ├── TSResearchRegistry.java
+                    │   │   ├── MirrorResearchItem.java
+                    │   │   └── DynamicResearchPages.java
+                    │   └── recipes/
+                    │       ├── InfusionRecipes.java
+                    │       ├── DynamicInfusionRecipes.java
+                    │       ├── CrucibleRecipes.java
+                    │       ├── ArcaneShapelessRecipes.java
+                    │       └── ArcaneShapedRecipes.java
+                    ├── proxy/
+                    │   ├── CommonProxy.java
+                    │   └── ClientProxy.java
+                    ├── items/
+                    │   └── ModItems.java
+                    ├── handlers/
+                    │   └── FoodEventHandler.java
+                    ├── debug/
+                    │   ├── TSFXTestGui.java
+                    │   └── CommandTSFXTest.java
+                    ├── api/
+                    │   └── thaumcraft/
+                    │       ├── thaumcrafttools/
+                    │       │   ├── TCResearchHelper.java
+                    │       │   └── TCRecipes.java
+                    │       └── tcapiusetools/
+                    │           ├── TCSounds.java
+                    │           ├── TCParticles.java
+                    │           ├── TCOreDict.java
+                    │           ├── TCItems.java
+                    │           ├── TCEntities.java
+                    │           ├── TCBlocks.java
+                    │           └── TCAspects.java
+                    └── ThaumicSurvival.java
