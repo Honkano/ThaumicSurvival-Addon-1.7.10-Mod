@@ -78,7 +78,7 @@ public class DynamicInfusionRecipes {
     // ==========================================
     private static void initGreedyAppleRecipes() {
         AspectList baseEssentia = TCAspects
-            .of(TCAspects.FIRE, 32, TCAspects.LIFE, 48, TCAspects.MAGIC, 64, TCAspects.GREED, 64, TCAspects.HUNGER, 32);
+            .of(TCAspects.FIRE, 32, TCAspects.LIFE, 48, TCAspects.MAGIC, 64, TCAspects.GREED, 64, TCAspects.HUNGER, 32, TCAspects.EARTH, 8, TCAspects.FIRE, 8, TCAspects.WATER, 8, TCAspects.AIR, 8, TCAspects.ORDER, 8, TCAspects.ENTROPY, 8);
 
         // 每一级需要的材料和倍率 (组件, 倍率, 不稳定度)
         Object[][] levels = {

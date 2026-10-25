@@ -44,10 +44,10 @@ public class TSResearchRegistry {
         // 注册自定义分类
         ResearchCategories.registerCategory(
             "THAUMICSURVIVAL",
-            new ResourceLocation("thaumicsurvival", "textures/items/golden_apple_icon.png"),
-            new ResourceLocation("thaumcraft", "textures/gui/gui_researchback.png"));
+            new ResourceLocation("thaumicsurvival", "textures/gui/TSResearchmain/TSiconpng.png"),
+            new ResourceLocation("thaumicsurvival", "textures/gui/TSResearchmain/gui_researchback.png"));
 
-        // 1. 主节点
+        // 主节点
         new ResearchItem(
             "THAUMICSURVIVAL_MASTER",
             "THAUMICSURVIVAL",
@@ -55,7 +55,7 @@ public class TSResearchRegistry {
             0,
             0,
             1,
-            new ResourceLocation("thaumicsurvival", "textures/items/golden_apple_icon.png"))
+            new ResourceLocation("thaumicsurvival", "textures/gui/TSResearchmain/page/main.png"))
                 .setAutoUnlock()
                 .setStub()
                 .setRound()
@@ -64,8 +64,7 @@ public class TSResearchRegistry {
                     TCResearchHelper.textPage("THAUMICSURVIVAL_MASTER", 2))
                 .registerResearchItem();
 
-
-        // 2. 简易黑曜石
+        // 简易黑曜石
         new ResearchItem(
             "THAUMICSURVIVAL_SIMPLE_OBSIDIAN",
             "THAUMICSURVIVAL",
@@ -76,68 +75,72 @@ public class TSResearchRegistry {
                 8, // 岩浆有火
                 TCAspects.WATER,
                 4), // 水桶有水
+            0,
+            -4,
             1,
-            -1,
-            1,
-            TCBlocks.obsidian()).setParents("THAUMICSURVIVAL_MASTER")
+            TCBlocks.obsidian())
+                .setParents("THAUMICSURVIVAL_MASTER")
                 .setPages(
                     TCResearchHelper.textPage("THAUMICSURVIVAL_SIMPLE_OBSIDIAN", 1),
                     TCResearchHelper.textPage("THAUMICSURVIVAL_SIMPLE_OBSIDIAN", 2),
                     new ResearchPage(ArcaneShapelessRecipes.recipeSimpleObsidian)) // 引用无序配方
                 .registerResearchItem();
 
-
-        // 3. 秘源金苹果（直接调用拆分好的配方变量）
+        // 简易金苹果（直接调用拆分好的配方变量）
         new ResearchItem(
             "THAUMICSURVIVAL_SIMPLE_GAPPLE",
             "THAUMICSURVIVAL",
             TCAspects.of(TCAspects.GREED, 64, TCAspects.LIFE, 32, TCAspects.FIRE, 64, TCAspects.MAGIC, 16),
-            3,
-            0,
+            2,
+            -11,
             1,
-            TCItems.goldenApple()).setParents("THAUMICSURVIVAL_MASTER")
+            TCItems.goldenApple())
+                .setParents("THAUMICSURVIVAL_SIMPLE_ANVIL")
                 .setPages(
                     TCResearchHelper.textPage("THAUMICSURVIVAL_SIMPLE_GAPPLE", 1),
                     new ResearchPage(ArcaneShapedRecipes.recipeSimpleApple)) // 引用有序配方
                 .setConcealed()
                 .registerResearchItem();
 
-        // 4. 简易铁砧
+        // 简易铁砧
         new ResearchItem(
             "THAUMICSURVIVAL_SIMPLE_ANVIL",
             "THAUMICSURVIVAL",
             TCAspects.of(TCAspects.CRAFT, 8, TCAspects.METAL, 8, TCAspects.TOOL, 4),
-            2,
             3,
+            -7,
             1,
-            TCBlocks.anvil()).setParents("THAUMICSURVIVAL_MASTER")
+            TCBlocks.anvil())
+                .setParents("THAUMICSURVIVAL_SIMPLE_OBSIDIAN")
                 .setPages(
                     TCResearchHelper.textPage("THAUMICSURVIVAL_SIMPLE_ANVIL", 1),
                     new ResearchPage(ArcaneShapedRecipes.recipeSimpleAnvil)) // 引用有序配方
+                .setConcealed()    
                 .registerResearchItem();
 
-        // 5. 注魔铁砧（页面组装交给 DynamicResearchPages 处理）
+        // 注魔铁砧（页面组装交给 DynamicResearchPages 处理）
         new ResearchItem(
             "THAUMICSURVIVAL_INFUSION_ANVIL",
             "THAUMICSURVIVAL",
             TCAspects.of(TCAspects.CRAFT, 16, TCAspects.METAL, 16, TCAspects.TOOL, 8, TCAspects.MAGIC, 8),
-            1,
-            5,
+            7,
+            -8,
             2,
-            TCBlocks.anvil()).setParents("THAUMICSURVIVAL_SIMPLE_ANVIL", "MIRROR_INFUSION")
+            TCBlocks.anvil())
+                .setParents("THAUMICSURVIVAL_SIMPLE_ANVIL", "MIRROR_INFUSION")
                 .setParentsHidden(TCResearchHelper.RESEARCH_INFUSION)
                 .setPages(DynamicResearchPages.buildAnvilPages())
                 .setConcealed()
                 .setSpecial()
                 .registerResearchItem();
 
-        // 6. 魔铸金苹果（页面组装交给 DynamicResearchPages 处理）
+        // 魔铸金苹果（页面组装交给 DynamicResearchPages 处理）
         new ResearchItem(
             "THAUMICSURVIVAL_ENCHANTED_GAPPLE",
             "THAUMICSURVIVAL",
             TCAspects.of(TCAspects.GREED, 16, TCAspects.MAGIC, 16, TCAspects.LIFE, 12, TCAspects.HUNGER, 8),
-            5,
-            5,
+            6,
+            -11,
             3,
             TCItems.notchApple())
                 .setParents("THAUMICSURVIVAL_SIMPLE_GAPPLE", "MIRROR_INFUSION")
@@ -146,6 +149,7 @@ public class TSResearchRegistry {
                 .setConcealed()
                 .setSpecial()
                 .registerResearchItem();
+
 
 
 
@@ -423,8 +427,8 @@ public class TSResearchRegistry {
             "THAUMICSURVIVAL", // ★ 用你刚改的新常量名
             TCResearchHelper.CATEGORY_ARTIFICE, // 原版注魔在奥术（ARTIFICE）分类
             "INFUSION", // 原版研究 Key（注魔）
-            3,
-            4, // 坐标（找个空地放，比如铁砧旁边）
+            4,
+            -9, // 坐标（找个空地放，比如铁砧旁边）
             TCBlocks.infusionMatrix() // 图标（用符文矩阵）
         );
 

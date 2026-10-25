@@ -14,14 +14,14 @@ import thaumcraft.api.crafting.IArcaneRecipe;
 public class ArcaneShapedRecipes {
 
     // 声明为静态变量，供研究页面调用
-    public static IArcaneRecipe recipeSimpleApple;// 秘源金苹果
+    public static IArcaneRecipe recipeSimpleApple;// 简易金苹果
     public static IArcaneRecipe recipeSimpleAnvil;// 简易铁砧
 
     public static void init() {
         // ==========================================
-        // 1. 秘源金苹果（奥术有序配方）
+        // 1. 简易金苹果（奥术有序配方）
         // ==========================================
-        AspectList visCost = TCAspects.of(TCAspects.EARTH, 8, TCAspects.FIRE, 8, TCAspects.WATER, 8);
+        AspectList visCost = TCAspects.of(TCAspects.EARTH, 8, TCAspects.FIRE, 8, TCAspects.WATER, 8, TCAspects.AIR, 8, TCAspects.ORDER, 8, TCAspects.ENTROPY, 8);
         ItemStack simpleApple = ModItems.createGoldenApple(0, "§6秘源金苹果", 0, "§7蕴含微量原始要素", "§7食用后可获得§r§6原始要素研究点§7");
 
         recipeSimpleApple = TCRecipes.arcaneShaped(

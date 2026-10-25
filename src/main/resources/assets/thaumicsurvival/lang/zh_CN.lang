@@ -9,17 +9,17 @@ tc.research_category.THAUMICSURVIVAL=神秘生存学
 tc.research_name.THAUMICSURVIVAL_MASTER=神秘生存学
 tc.research_text.THAUMICSURVIVAL_MASTER=生存的另一种可能
 
-tc.research_page.THAUMICSURVIVAL_MASTER.1=我一直在想一个问题。为什么神秘使们总是追求更强大的法术？更好的魔杖？更纯粹的源质？难道……就没有人想过——如何在杀戮中生存下去？<BR><BR>我翻阅了所有古老的典籍，从奥术到炼金，从注魔到傀儡。没有一本提到过“生存”这两个字。他们都在逃避，逃避真实的世界。
+tc.research_page.THAUMICSURVIVAL_MASTER.1=<IMG>thaumicsurvival:textures/gui/TSResearchmain/langpack/thaumicsurvivalmainzhcn.png:0:0:255:255:0.55</IMG>
 
 tc.research_page.THAUMICSURVIVAL_MASTER.2=真实的世界是——你死，或者我活，没有第三种可能。<BR><BR>我开始记录我的研究，不是为了知识，是为了活着。我称之为……“神秘生存学”。一门关于在魔法世界里活下去的学问。<BR><BR>听起来很蠢，对吧？一个神秘使，研究生存。但你不觉得奇怪吗？为什么我们掌握着如此强大的力量，却还是会被怪物杀死？会被那些所谓的“神明”踩在脚下？<BR><BR>神秘时代教会了我如何理解世界，但没有人教会我如何活着。所以我要自己来。我要把每一份源质变成活下去的资本，我要让这个世界的所有怪物……都成为我活下去的养料。欢迎来到神秘生存学。
 
 # ============================================================
 # 秘源金苹果（一页搞定）
 # ============================================================
-tc.research_name.THAUMICSURVIVAL_SIMPLE_GAPPLE=秘源金苹果
-tc.research_text.THAUMICSURVIVAL_SIMPLE_GAPPLE=以元素之力铸就的智慧之果
+tc.research_name.THAUMICSURVIVAL_SIMPLE_GAPPLE=简易金苹果
+tc.research_text.THAUMICSURVIVAL_SIMPLE_GAPPLE=省去了金锭，却留下了悬念
 
-tc.research_page.THAUMICSURVIVAL_SIMPLE_GAPPLE.1=我偶然发现了一种方法。用普通的金锭和苹果，在奥术工作台上，注入大地、火焰与水的力量，便能得到一种特殊的金苹果。<BR><BR>它蕴含着纯粹的原始要素。吃下去，便能直接领悟要素的真谛。这比研究笔记快多了，也危险多了。因为——它是贪婪的产物，它让人上瘾。
+tc.research_page.THAUMICSURVIVAL_SIMPLE_GAPPLE.1=你盯着工作台，觉得用整整八个金锭去合成一个金苹果，简直是暴殄天物。<BR><BR>你尝试着将金锭与苹果放入奥术工作台，并分别注入了六大原始要素（风、地、火、水、秩序、混沌）的力量。<BR><BR>伴随着一阵微弱的奥术光芒，一个金苹果诞生了。不，它或许没那么普通。当你咬下第一口时，一股奇妙的知觉涌上心头——你居然从这股味道中直接领悟到了一丝要素的真谛。虽然仅有一点点，但这可比老老实实看研究笔记快得多了。<BR><BR>你低头看着手中剩下的半个苹果，直觉告诉你，这仅仅只是个开始...
 
 # ============================================================
 # 魔铸金苹果（贪婪注魔，排版更紧凑）
@@ -27,16 +27,16 @@ tc.research_page.THAUMICSURVIVAL_SIMPLE_GAPPLE.1=我偶然发现了一种方法�
 tc.research_name.THAUMICSURVIVAL_ENCHANTED_GAPPLE=魔铸金苹果
 tc.research_text.THAUMICSURVIVAL_ENCHANTED_GAPPLE=贪婪的终极形态
 
-tc.research_page.THAUMICSURVIVAL_GREED.1=你已经尝到了秘源金苹果的甜头，但你觉得……还不够。<BR><BR>为什么需要四个金块？三个不行吗？两个不行吗？你开始思考：如果用金锭代替金块呢？如果……只用一块金锭和一个苹果呢？<BR><BR>贪婪，开始吞噬你的理智。但你不在乎，你只想要更多。
+tc.research_page.THAUMICSURVIVAL_GREED.1=你已经尝到了简易金苹果的甜头，但人类的本质是……不知足。<BR><BR>为什么非得要四个金块？三个不行吗？两个不行吗？要是用金锭代替，甚至只用一块金锭加个苹果呢？<BR><BR>你脑海中突然浮现出那个拿着毒苹果哄骗白雪公主的恶毒皇后。不过老实说，她可没你贪婪。毕竟，她的毒苹果只带走了一条命；而你手里的这玩意儿，搞不好能带走你的理智。<BR><BR>你决定放手一搏。这不是炼金，这是一场经典的美国经济泡沫学——你正试图用越来越少的底层资产，去撬动越来越夸张的魔法杠杆。
 
-tc.research_page.THAUMICSURVIVAL_GREED.2=你找到了方法。但代价是——每减少一份材料，所需的源质就会成倍增长，不稳定性也会指数级飙升。<BR><BR>你可以继续贪婪下去，用更少的材料换取同样的力量。但你要问自己一个问题——这个代价，你承担得起吗？
+tc.research_page.THAUMICSURVIVAL_GREED.2=你找到了这个疯狂的模型。<BR><BR>但代价是——每抽掉一份实质材料，所需的源质就会呈指数级翻倍，注魔的不稳定性更是直冲云霄，随时可能把你的注魔台炸上天。<BR><BR>这就好比一场注定要崩盘的金融豪赌。当然，你也可以把它当做一个普通的附魔金苹果来享受它带来的好处 你可以继续贪婪下去，用极其寒酸的材料，换取毁天灭地的力量。但你现在得问自己一个问题——那宛如雪崩般飙升的永久扭曲值（Warp），你这副凡人的躯壳，真的扛得住吗？
 
-tc.research_page.THAUMICSURVIVAL_GREED.3=你吞下了它。你吞下了一切。<BR><BR>源质在你体内燃烧、翻滚、怒吼——你感觉到它们在改变你。在污染你。在……祝福你。你已经分不清了。但你不在乎。<BR><BR>因为力量——才是唯一真实的东西。你愿意付出一切代价，来换取……更多。更多。更多。
+tc.research_page.THAUMICSURVIVAL_GREED.3=你毫不犹豫地吞下了它。连核都没吐。<BR><BR>狂暴的源质在你体内燃烧、翻滚、嘶吼。你感觉到它们在重塑你的灵魂，在污染你的基因，甚至……在以一种极其扭曲的方式“祝福”你。你已经分不清了，满脑子只剩下一个念头：再来一口。<BR><BR>理智在狂笑中碎裂。毕竟，力量——才是这世上唯一真实的硬通货。什么永久扭曲？什么虚空低语？随它去吧。<BR><BR>好戏才刚刚开始。祝你好胃口，也祝你的理智（和你的存档）好运。
 
 # ============================================================
 # 物品名称
 # ============================================================
-item.golden_apple_simple.name=秘源金苹果
+item.golden_apple_simple.name=简易金苹果
 item.golden_apple_enchanted.name=魔铸金苹果
 
 # ============================================================
