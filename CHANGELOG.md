@@ -1,4 +1,4 @@
-# 📦 ThaumicSurvival Mod 更新日志 (Changelog)
+# ThaumicSurvival Mod 更新日志 (Changelog)
 
 <!-- 
   ============================================================
