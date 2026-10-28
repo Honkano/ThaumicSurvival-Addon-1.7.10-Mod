@@ -1,9 +1,8 @@
 package com.kongtai.thaumicsurvival.proxy;
 
-import net.minecraftforge.common.MinecraftForge;
-
 import com.kongtai.thaumicsurvival.ThaumicSurvival;
-import com.kongtai.thaumicsurvival.handlers.FoodEventHandler;
+import com.kongtai.thaumicsurvival.blocks.ModBlocks;
+import com.kongtai.thaumicsurvival.items.ModItems;
 import com.kongtai.thaumicsurvival.thaumcraftwork.recipes.ArcaneShapedRecipes;
 import com.kongtai.thaumicsurvival.thaumcraftwork.recipes.ArcaneShapelessRecipes;
 import com.kongtai.thaumicsurvival.thaumcraftwork.recipes.CrucibleRecipes;
@@ -19,6 +18,9 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 public class CommonProxy {
 
     public void preInit(FMLPreInitializationEvent event) {
+        // 注册物品
+        ModBlocks.registerBlocks();
+        ModItems.registerItems();
         ThaumicSurvival.LOG.info("[ThaumicSurvival]神秘生存学 正在预初始化...");
     }
 
@@ -37,12 +39,11 @@ public class CommonProxy {
         // 2. 注册研究页面
         TSResearchRegistry.init();
 
-        // 3. 注册事件（吃苹果的监听）
-        MinecraftForge.EVENT_BUS.register(new FoodEventHandler());
     }
 
     public void postInit(FMLPostInitializationEvent event) {
         ThaumicSurvival.LOG.info("[ThaumicSurvival]神秘生存学 后初始化完成！");
+
         TSResearchRegistry.postInit(); // 开启镜像研究节点模式 详情请记观察 [MirrorResearchItem.java]
     }
 

@@ -1285,4 +1285,9 @@ public class TCItems {
         return new ItemStack(Items.lava_bucket);
     }
 
+    /** 书本 */
+    public static ItemStack book() {
+        return new ItemStack(Items.book);
+    }
+
 }

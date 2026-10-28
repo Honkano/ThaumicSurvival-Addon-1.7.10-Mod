@@ -806,9 +806,9 @@ public class TCBlocks {
     // 【Section 20】无 meta 的常用方块
     // ============================================================
 
-    /** 隙间 */
+    /** 隙间（多方块结构专用占位符，带虚线框） */
     public static ItemStack hole() {
-        return new ItemStack(ConfigBlocks.blockHole);
+        return new ItemStack(ConfigBlocks.blockHole, 1, 15); // 👈 必须是 15！
     }
 
     /** 饕餮箱子 */
@@ -975,5 +975,10 @@ public class TCBlocks {
 
     public static ItemStack lever() {
         return new ItemStack(Blocks.lever);
+    }
+
+    /** 附魔台 */
+    public static ItemStack enchantingTable() {
+        return new ItemStack(Blocks.enchanting_table);
     }
 }

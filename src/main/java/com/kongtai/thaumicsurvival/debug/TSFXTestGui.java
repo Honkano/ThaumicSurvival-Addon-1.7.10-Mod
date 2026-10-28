@@ -52,9 +52,6 @@ import thaumcraft.api.aspects.Aspect;
 @SideOnly(Side.CLIENT)
 public class TSFXTestGui extends GuiScreen {
 
-    /** 指令执行后置 true，下一 tick 由 ClientProxy 打开 GUI */
-    public static boolean pendingOpen = false;
-
     // ---- 布局常量 ----
     private static final int COLS = 9;
     private static final int ROWS = 6;

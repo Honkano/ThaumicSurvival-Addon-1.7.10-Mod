@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>3D 多方块结构坐标设计器</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #111; color: white; font-family: sans-serif; }
+        #ui { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; z-index: 10; width: 250px; }
+        button { width: 100%; padding: 8px; margin-top: 10px; background: #5d4b78; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        button:hover { background: #a988d9; }
+        textarea { width: 100%; height: 150px; margin-top: 10px; background: #222; color: #00ffcc; border: 1px solid #5d4b78; font-family: monospace; }
+        .hint { font-size: 12px; color: #aaa; margin-bottom: 10px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    <h3 style="margin-top: 0;">3D 结构设计器</h3>
+    <div class="hint">
+        <b>操作说明：</b><br>
+        🖱️ 左键拖拽：旋转视角<br>
+        🖱️ 右键拖拽：平移视角<br>
+        🖱️ 滚轮：缩放<br>
+        <b>左键单击网格：</b>放置/删除方块
+    </div>
+    <button onclick="exportCoords()">📥 导出 3D 坐标</button>
+    <button onclick="clearAll()" style="background:#8b2e2e; border-color:#ff5555;">🗑️ 清空</button>
+    <textarea id="output" readonly placeholder="导出的坐标会显示在这里..."></textarea>
+</div>
+
+<!-- 引入 Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+    let scene, camera, renderer, controls;
+    let gridHelper, blocks = [];
+    let raycaster, mouse;
+    let plane;
+    
+    // 用于区分是“点击”还是“拖拽”
+    let downX = 0, downY = 0;
+
+    init();
+    animate();
+
+    function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a1a);
+
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+        camera.position.set(10, 10, 10);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.1;
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        scene.add(dirLight);
+
+        // 参考网格
+        gridHelper = new THREE.GridHelper(16, 16, 0x888888, 0x444444);
+        scene.add(gridHelper);
+
+        raycaster = new THREE.Raycaster();
+        mouse = new THREE.Vector2();
+        
+        // 接收点击事件的平面 (改为完全透明但真实存在，确保射线能打中)
+        const planeGeo = new THREE.PlaneGeometry(20, 20);
+        const planeMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+        plane = new THREE.Mesh(planeGeo, planeMat);
+        plane.rotation.x = -Math.PI / 2;
+        scene.add(plane);
+
+        window.addEventListener('resize', onWindowResize, false);
+        
+        // 监听按下和抬起事件
+        renderer.domElement.addEventListener('pointerdown', onPointerDown, false);
+        renderer.domElement.addEventListener('pointerup', onPointerUp, false);
+    }
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function onPointerDown(event) {
+        if (event.button !== 0) return; // 只处理左键
+        downX = event.clientX;
+        downY = event.clientY;
+    }
+
+    function onPointerUp(event) {
+        if (event.button !== 0) return; // 只处理左键
+        
+        // 计算鼠标移动距离，如果大于 5 像素，说明玩家在拖拽视角，不放置方块
+        const distance = Math.sqrt(Math.pow(event.clientX - downX, 2) + Math.pow(event.clientY - downY, 2));
+        if (distance > 5) return; 
+
+        // 计算鼠标位置
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+
+        // 1. 优先检测是否点中已有方块 (删除)
+        const intersectsBlocks = raycaster.intersectObjects(blocks);
+        if (intersectsBlocks.length > 0) {
+            const block = intersectsBlocks[0].object;
+            scene.remove(block);
+            blocks = blocks.filter(b => b !== block);
+            return;
+        }
+
+        // 2. 检测是否点中地面 (放置)
+        const intersectsPlane = raycaster.intersectObject(plane);
+        if (intersectsPlane.length > 0) {
+            const point = intersectsPlane[0].point;
+            const x = Math.round(point.x);
+            const z = Math.round(point.z);
+            addBlock(x, 0, z);
+        }
+    }
+
+    function addBlock(x, y, z) {
+        if (blocks.some(b => b.position.x === x && b.position.y === y && b.position.z === z)) return;
+
+        const geo = new THREE.BoxGeometry(0.95, 0.95, 0.95);
+        const mat = new THREE.MeshLambertMaterial({ color: 0x8a2be2, transparent: true, opacity: 0.8 });
+        const cube = new THREE.Mesh(geo, mat);
+        
+        cube.position.set(x, y, z);
+        const edges = new THREE.EdgesGeometry(geo);
+        const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff }));
+        cube.add(line);
+
+        scene.add(cube);
+        blocks.push(cube);
+    }
+
+    function exportCoords() {
+        if (blocks.length === 0) {
+            alert("还没有放置方块！");
+            return;
+        }
+
+        blocks.sort((a, b) => {
+            if (a.position.y !== b.position.y) return a.position.y - b.position.y;
+            if (a.position.z !== b.position.z) return a.position.z - b.position.z;
+            return a.position.x - b.position.x;
+        });
+
+        let text = "// 一共 " + blocks.length + " 个方块\n";
+        blocks.forEach(b => {
+            text += `new ItemStack(方块ID, 1), // X: ${b.position.x}, Y: ${b.position.y}, Z: ${b.position.z}\n`;
+        });
+
+        document.getElementById("output").value = text;
+        alert("导出成功！请查看左侧文本框。");
+    }
+
+    function clearAll() {
+        blocks.forEach(b => scene.remove(b));
+        blocks = [];
+        document.getElementById("output").value = "";
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+</script>
+</body>
+</html>

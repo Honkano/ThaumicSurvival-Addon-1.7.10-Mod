@@ -5,433 +5,258 @@ import net.minecraft.util.ResourceLocation;
 import com.kongtai.thaumicsurvival.api.thaumcraft.tcapiusetools.TCAspects;
 import com.kongtai.thaumicsurvival.api.thaumcraft.tcapiusetools.TCBlocks;
 import com.kongtai.thaumicsurvival.api.thaumcraft.tcapiusetools.TCItems;
+import com.kongtai.thaumicsurvival.api.thaumcraft.thaumcrafttools.Research;
 import com.kongtai.thaumicsurvival.api.thaumcraft.thaumcrafttools.TCResearchHelper;
-import com.kongtai.thaumicsurvival.thaumcraftwork.recipes.ArcaneShapedRecipes;
-import com.kongtai.thaumicsurvival.thaumcraftwork.recipes.ArcaneShapelessRecipes;
+import com.kongtai.thaumicsurvival.api.tsapi.TSItems;
+import com.kongtai.thaumicsurvival.thaumcraftwork.recipes.MultiblockStructures;
 
-import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.research.ResearchCategories;
-import thaumcraft.api.research.ResearchItem;
-import thaumcraft.api.research.ResearchPage;
 
 /**
  * ============================================================
- * 【研究页写法指南 · 按配方类分类】
+ * 【神秘生存学 · 研究注册总站】
  * ============================================================
- * 核心原则：一个配方类，对应一种研究页写法。
- *
- * 配方类 研究页怎么写
- * ─────────────────────────────────────────────
- * ArcaneShapedRecipes new ResearchPage(recipeXxx)
- * ArcaneShapelessRecipes new ResearchPage(recipeXxx)
- * InfusionRecipes new ResearchPage(recipeXxx)
- * DynamicInfusionRecipes DynamicResearchPages.buildXxxPages()
- * CrucibleRecipes new ResearchPage(recipeXxx)
- * 或 .toArray(new CrucibleRecipe[0])
- *
- * 配方页构造器接收的是“配方对象”，不是字符串。
- * 所以配方必须先注册，并存到静态字段或 List，
- * 研究页里直接引用那个字段/List。
- *
- * 本类只放注释模板，不注册任何东西，不会崩。
- * 写新研究页时，按“配方类”找对应 section，照抄改参数。
+ * 大肥鱼倾情重写，全部使用最新 Research.of() 丝滑写法。
  * ============================================================
  */
-
 public class TSResearchRegistry {
 
     public static void init() {
-        // 注册自定义分类
+        // ============================================================
+        // 👇 1. 注册自定义分类
+        // ============================================================
         ResearchCategories.registerCategory(
-            "THAUMICSURVIVAL",
+            TCResearchHelper.CATEGORY_THAUMICSURVIVAL,
             new ResourceLocation("thaumicsurvival", "textures/gui/TSResearchmain/TSiconpng.png"),
             new ResourceLocation("thaumicsurvival", "textures/gui/TSResearchmain/gui_researchback.png"));
 
-        // 主节点
-        new ResearchItem(
-            "THAUMICSURVIVAL_MASTER",
-            "THAUMICSURVIVAL",
-            new AspectList(),
-            0,
-            0,
-            1,
-            new ResourceLocation("thaumicsurvival", "textures/gui/TSResearchmain/page/main.png"))
-                .setAutoUnlock()
-                .setStub()
-                .setRound()
-                .setPages(
-                    TCResearchHelper.textPage("THAUMICSURVIVAL_MASTER", 1),
-                    TCResearchHelper.textPage("THAUMICSURVIVAL_MASTER", 2))
-                .registerResearchItem();
+        // ============================================================
+        // 👇 2. 注册所有研究节点（宝宝级图文说明）
+        // ============================================================
 
-        // 简易黑曜石
-        new ResearchItem(
-            "THAUMICSURVIVAL_SIMPLE_OBSIDIAN",
-            "THAUMICSURVIVAL",
-            TCAspects.of(
-                TCAspects.EARTH,
-                8, // 黑曜石偏大地
-                TCAspects.FIRE,
-                8, // 岩浆有火
-                TCAspects.WATER,
-                4), // 水桶有水
-            0,
-            -4,
-            1,
-            TCBlocks.obsidian())
-                .setParents("THAUMICSURVIVAL_MASTER")
-                .setPages(
-                    TCResearchHelper.textPage("THAUMICSURVIVAL_SIMPLE_OBSIDIAN", 1),
-                    TCResearchHelper.textPage("THAUMICSURVIVAL_SIMPLE_OBSIDIAN", 2),
-                    new ResearchPage(ArcaneShapelessRecipes.recipeSimpleObsidian)) // 引用无序配方
-                .registerResearchItem();
+        // 【节点 01】主节点
+        Research.of("THAUMICSURVIVAL_MASTER")
+            .at(0, 0) // 坐标：正中心
+            .tier(1) // 难度：1
+            .icon(new ResourceLocation("thaumicsurvival", "textures/gui/TSResearchmain/page/main.png")) // 图标：使用贴图
+            .autoUnlock() // 开关：进游戏直接送
+            .stub() // 开关：空壳节点（没配方）
+            .round() // 开关：圆形边框
+            .textPages(2) // 页面：自动生成 tc.research_page.THAUMICSURVIVAL_MASTER.1 和 .2
+            .build(); // 组装并注册！
 
-        // 简易金苹果（直接调用拆分好的配方变量）
-        new ResearchItem(
-            "THAUMICSURVIVAL_SIMPLE_GAPPLE",
-            "THAUMICSURVIVAL",
-            TCAspects.of(TCAspects.GREED, 64, TCAspects.LIFE, 32, TCAspects.FIRE, 64, TCAspects.MAGIC, 16),
-            2,
-            -11,
-            1,
-            TCItems.goldenApple())
-                .setParents("THAUMICSURVIVAL_SIMPLE_ANVIL")
-                .setPages(
-                    TCResearchHelper.textPage("THAUMICSURVIVAL_SIMPLE_GAPPLE", 1),
-                    new ResearchPage(ArcaneShapedRecipes.recipeSimpleApple)) // 引用有序配方
-                .setConcealed()
-                .registerResearchItem();
+        // 【节点 02】简易黑曜石
+        Research.of("THAUMICSURVIVAL_SIMPLE_OBSIDIAN")
+            .at(0, -4)
+            .tier(1)
+            .aspects(TCAspects.of(TCAspects.EARTH, 8, TCAspects.FIRE, 8, TCAspects.WATER, 4)) // 要素：地8 火8 水4
+            .icon(TCBlocks.obsidian()) // 图标：用物品
+            .parents("THAUMICSURVIVAL_MASTER") // 前置：必须解锁主节点
+            .textPages(2)
+            // 加点配方页：引用无序配方
+            .arcanePage()
+            .build();
 
-        // 简易铁砧
-        new ResearchItem(
-            "THAUMICSURVIVAL_SIMPLE_ANVIL",
-            "THAUMICSURVIVAL",
-            TCAspects.of(TCAspects.CRAFT, 8, TCAspects.METAL, 8, TCAspects.TOOL, 4),
-            3,
-            -7,
-            1,
-            TCBlocks.anvil())
-                .setParents("THAUMICSURVIVAL_SIMPLE_OBSIDIAN")
-                .setPages(
-                    TCResearchHelper.textPage("THAUMICSURVIVAL_SIMPLE_ANVIL", 1),
-                    new ResearchPage(ArcaneShapedRecipes.recipeSimpleAnvil)) // 引用有序配方
-                .setConcealed()    
-                .registerResearchItem();
+        // 【节点 03】简易金苹果
+        Research.of("THAUMICSURVIVAL_SIMPLE_GAPPLE")
+            .at(2, -11)
+            .tier(1)
+            .aspects(TCAspects.of(TCAspects.GREED, 64, TCAspects.LIFE, 32, TCAspects.FIRE, 64, TCAspects.MAGIC, 16))
+            .icon(TSItems.arcaneApple())
+            .parents("THAUMICSURVIVAL_SIMPLE_ANVIL")
+            .textPages(1) // 只有 1 页文本
+            .arcanePage()
+            .concealed() // 开关：前置未完成时隐藏（连灰影都看不见）
+            .build();
 
-        // 注魔铁砧（页面组装交给 DynamicResearchPages 处理）
-        new ResearchItem(
-            "THAUMICSURVIVAL_INFUSION_ANVIL",
-            "THAUMICSURVIVAL",
-            TCAspects.of(TCAspects.CRAFT, 16, TCAspects.METAL, 16, TCAspects.TOOL, 8, TCAspects.MAGIC, 8),
-            7,
-            -8,
-            2,
-            TCBlocks.anvil())
-                .setParents("THAUMICSURVIVAL_SIMPLE_ANVIL", "MIRROR_INFUSION")
-                .setParentsHidden(TCResearchHelper.RESEARCH_INFUSION)
-                .setPages(DynamicResearchPages.buildAnvilPages())
-                .setConcealed()
-                .setSpecial()
-                .registerResearchItem();
+        // 【节点 04】简易铁砧
+        Research.of("THAUMICSURVIVAL_SIMPLE_ANVIL")
+            .at(3, -7)
+            .tier(1)
+            .aspects(TCAspects.of(TCAspects.CRAFT, 8, TCAspects.METAL, 8, TCAspects.TOOL, 4))
+            .icon(TCBlocks.anvil())
+            .parents("THAUMICSURVIVAL_SIMPLE_OBSIDIAN")
+            .textPages(1)
+            .arcanePage()
+            .concealed()
+            .build();
 
-        // 魔铸金苹果（页面组装交给 DynamicResearchPages 处理）
-        new ResearchItem(
-            "THAUMICSURVIVAL_ENCHANTED_GAPPLE",
-            "THAUMICSURVIVAL",
-            TCAspects.of(TCAspects.GREED, 16, TCAspects.MAGIC, 16, TCAspects.LIFE, 12, TCAspects.HUNGER, 8),
-            6,
-            -11,
-            3,
-            TCItems.notchApple())
-                .setParents("THAUMICSURVIVAL_SIMPLE_GAPPLE", "MIRROR_INFUSION")
-                .setParentsHidden(TCResearchHelper.RESEARCH_INFUSION)
-                .setPages(DynamicResearchPages.buildGreedyApplePages())
-                .setConcealed()
-                .setSpecial()
-                .registerResearchItem();
+        // 【节点 05】注魔铁砧
+        Research.of("THAUMICSURVIVAL_INFUSION_ANVIL")
+            .at(7, -8)
+            .tier(2)
+            .aspects(TCAspects.of(TCAspects.CRAFT, 16, TCAspects.METAL, 16, TCAspects.TOOL, 8, TCAspects.MAGIC, 8))
+            .icon(TCBlocks.anvil())
+            .parents("THAUMICSURVIVAL_SIMPLE_ANVIL", "MIRROR_INFUSION") // 可见前置
+            .parentsHidden(TCResearchHelper.RESEARCH_INFUSION) // 隐藏前置（原版注魔，不画线）
+            // 动态页面：直接塞入 DynamicResearchPages 生成好的页面数组
+            .textPages(2)
+            .infusionPage()
+            .concealed()
+            .special() // 开关：带刺六边形
+            .build();
 
+        // 【节点 06】魔铸金苹果
+        Research.of("THAUMICSURVIVAL_ENCHANTED_GAPPLE")
+            .at(6, -11)
+            .tier(3) // 难度 3
+            .aspects(TCAspects.of(TCAspects.GREED, 16, TCAspects.MAGIC, 16, TCAspects.LIFE, 12, TCAspects.HUNGER, 8))
+            .icon(TSItems.greedApple(7)) // 用 7 级苹果当图标
+            .parents("THAUMICSURVIVAL_SIMPLE_GAPPLE", "MIRROR_INFUSION")
+            .parentsHidden(TCResearchHelper.RESEARCH_INFUSION)
+            .textPages(3)
+            .infusionPage()
+            .concealed()
+            .special()
+            .build();
 
+        // 【节点 07】简易附魔台（4级极高难度）
+        Research.of("THAUMICSURVIVAL_SIMPLE_ENCHANTING_TABLE")
+            .at(0, -6)
+            .tier(4) // 难度 4，极其庞大的拼图！
+            .aspects(
+                TCAspects.of(
+                    TCAspects.MAGIC,
+                    16,
+                    TCAspects.MIND,
+                    12,
+                    TCAspects.CRAFT,
+                    10,
+                    TCAspects.TOOL,
+                    10,
+                    TCAspects.ORDER,
+                    8,
+                    TCAspects.GREED,
+                    6,
+                    TCAspects.ENERGY,
+                    6))
+            .icon(TCBlocks.enchantingTable())
+            .parents("THAUMICSURVIVAL_SIMPLE_OBSIDIAN", "MIRROR_INFUSIONENCHANTMENT")
+            .textPages(2)
+            .arcanePage()
+            .concealed()
+            .build();
 
+        // 【节点 08】黑曜石图腾（可购买）
+        Research.of("THAUMICSURVIVAL_OBSIDIAN_TOTEM")
+            .at(-2, -4)
+            .tier(2)
+            .aspects(TCAspects.of(TCAspects.MAGIC, 10, TCAspects.DARKNESS, 8)) // 这是购买价格
+            .icon(TCBlocks.obsidianTotem())
+            .parents("THAUMICSURVIVAL_SIMPLE_OBSIDIAN", "MIRROR_INFUSIONENCHANTMENT")
+            .textPages(3) // 生成 1, 2, 3 三页
+            .cruciblePage() // 👈 终极无参大招，自动去货架拿配方！
+            .secondary() // 开关：次要节点，花要素直接买通！
+            .concealed()
+            .build();
 
-        // 添加扭曲值
+        // ============================================================
+        // 🧪 【临时测试节点】：用来测试要素展示页和你的 Mixin
+        // ============================================================
+        Research.of("THAUMICSURVIVAL_TEST_NODE_DELETE_ME")
+            .at(10, 10) // 放在偏僻的角落，防撞车
+            .tier(1)
+            .icon(TCItems.diamond()) // 随便给个图标
+            .parents("THAUMICSURVIVAL_MASTER")
+            .textPages(1) // 第 1 页是普通文字
+            // 👇 第 2 页：测试要素展示页！
+            // 这里放了 10 点魔力、8 点火焰、5 点水
+            .aspectsPage(TCAspects.of(TCAspects.MAGIC, 10, TCAspects.FIRE, 8, TCAspects.WATER, 5))
+            .build();
+
+        // ============================================================
+        // 🧪 【测试节点】多方块结构展示（用来跑游戏看效果的）
+        // ============================================================
+        Research.of("THAUMICSURVIVAL_TEST_MULTIBLOCK")
+            .at(12, 12) // 找个没人的角落
+            .tier(2)
+            .icon(TCBlocks.infusionMatrix()) // 图标用符文矩阵
+            .parents("THAUMICSURVIVAL_MASTER") // 前置要求主节点
+            .textPages(1) // 给一页文本（你可以随便写点啥）
+            // 👇 直接用施工队（MultiblockStructures）里的图纸！
+            .multiblock(MultiblockStructures.getTestAltar())
+            .build();
+
+        // ============================================================
+        // 👇 3. 添加扭曲值
+        // ============================================================
         TCResearchHelper.warp("THAUMICSURVIVAL_SIMPLE_GAPPLE", 3);
         TCResearchHelper.warp("THAUMICSURVIVAL_ENCHANTED_GAPPLE", 10);
-
-        // ============================================================
-        // 【Section 1】ArcaneShapedRecipes → 有序奥术配方页
-        // ============================================================
-        //
-        // 配方法在哪：recipes/ArcaneShapedRecipes.java
-        // 配方字段：public static IArcaneRecipe recipeXxx;
-        //
-        // 研究页写法：
-        // new ResearchPage(ArcaneShapedRecipes.recipeXxx)
-        //
-        // 完整节点示例：
-        // new ResearchItem(
-        // "THAUMICSURVIVAL_XXX", // 研究 key
-        // "THAUMICSURVIVAL", // 分类 key
-        // TCAspects.of(TCAspects.MAGIC, 8), // 连连看要素
-        // 1, 0, 1, // x, y, 难度
-        // TCItems.diamond()) // 图标
-        // .setParents("THAUMICSURVIVAL_MASTER")
-        // .setPages(
-        // TCResearchHelper.textPage("THAUMICSURVIVAL_XXX", 1),
-        // new ResearchPage(ArcaneShapedRecipes.recipeXxx)
-        // )
-        // .registerResearchItem();
-        //
-        // 注意：
-        // ResearchPage 构造器认 IArcaneRecipe 和 ShapedArcaneRecipe，
-        // 字段类型是哪个都行。
-
-        // ============================================================
-        // 【Section 2】ArcaneShapelessRecipes → 无序奥术配方页
-        // ============================================================
-        //
-        // 配方法在哪：recipes/ArcaneShapelessRecipes.java
-        // 配方字段：public static IArcaneRecipe recipeXxx;
-        //
-        // 研究页写法：
-        // new ResearchPage(ArcaneShapelessRecipes.recipeXxx)
-        //
-        // 完整节点示例：
-        // new ResearchItem(
-        // "THAUMICSURVIVAL_XXX",
-        // "THAUMICSURVIVAL",
-        // TCAspects.of(TCAspects.CRAFT, 8),
-        // 1, 1, 1,
-        // TCBlocks.anvil())
-        // .setParents("THAUMICSURVIVAL_MASTER")
-        // .setPages(
-        // TCResearchHelper.textPage("THAUMICSURVIVAL_XXX", 1),
-        // new ResearchPage(ArcaneShapelessRecipes.recipeXxx)
-        // )
-        // .registerResearchItem();
-        //
-        // 注意：
-        // 有序/无序奥术用的是同一个 ResearchPage 构造器，
-        // 传进去它自己识别类型，不用你区分。
-
-        // ============================================================
-        // 【Section 3】InfusionRecipes → 普通注魔配方页
-        // ============================================================
-        //
-        // 配方法在哪：recipes/InfusionRecipes.java
-        // 配方字段：public static InfusionRecipe recipeXxx;
-        // 注意：这里只放“单级、静态”的普通注魔配方。
-        // 多级动态注魔看 Section 4。
-        //
-        // 研究页写法（单配方）：
-        // new ResearchPage(InfusionRecipes.recipeXxx)
-        //
-        // 研究页写法（多静态配方塞一页）：
-        // new ResearchPage(new InfusionRecipe[] {
-        // InfusionRecipes.recipeA,
-        // InfusionRecipes.recipeB
-        // })
-        //
-        // 完整节点示例：
-        // new ResearchItem(
-        // "THAUMICSURVIVAL_XXX",
-        // "THAUMICSURVIVAL",
-        // TCAspects.of(TCAspects.MAGIC, 8),
-        // 2, 4, 2,
-        // TCBlocks.anvil())
-        // .setParents("THAUMICSURVIVAL_SIMPLE_ANVIL")
-        // .setParentsHidden(TCResearchHelper.RESEARCH_INFUSION)
-        // .setPages(
-        // TCResearchHelper.textPage("THAUMICSURVIVAL_XXX", 1),
-        // new ResearchPage(InfusionRecipes.recipeXxx)
-        // )
-        // .setSpecial()
-        // .registerResearchItem();
-        //
-        // 注意：
-        // 动态注魔配方（8 级铁砧、8 级苹果）不要在这里写，
-        // 看 Section 4。
-
-        // ============================================================
-        // 【Section 4】DynamicInfusionRecipes → 动态注魔配方页
-        // ============================================================
-        //
-        // 配方法在哪：recipes/DynamicInfusionRecipes.java
-        // 配方字段：public static List<InfusionRecipe> xxxRecipes;
-        //
-        // 研究页写法：
-        // 不走 new ResearchPage(单个配方)，
-        // 走 DynamicResearchPages.buildXxxPages()。
-        //
-        // 例：
-        // .setPages(DynamicResearchPages.buildGreedyApplePages())
-        // .setPages(DynamicResearchPages.buildAnvilPages())
-        //
-        // 为什么走装配层：
-        // 动态配方是 List，需要“文本页 + 配方数组页”组合，
-        // buildXxxPages() 已经帮你把 List 转成 ResearchPage[]，
-        // 你只管调用。
-        //
-        // 完整节点示例：
-        // new ResearchItem(
-        // "THAUMICSURVIVAL_ENCHANTED_GAPPLE",
-        // "THAUMICSURVIVAL",
-        // TCAspects.of(TCAspects.GREED, 16),
-        // 5, 0, 3,
-        // TCItems.notchApple())
-        // .setParents("THAUMICSURVIVAL_SIMPLE_GAPPLE", TCResearchHelper.RESEARCH_INFUSION)
-        // .setPages(DynamicResearchPages.buildGreedyApplePages())
-        // .setSpecial()
-        // .registerResearchItem();
-        //
-        // 注意：
-        // 动态配方页内部用 InfusionRecipe[] 数组构造器，
-        // GUI 会循环翻，不用你写多个 ResearchPage。
-
-        // ============================================================
-        // 【Section 5】CrucibleRecipes → 坩埚配方页
-        // ============================================================
-        //
-        // 配方法在哪：recipes/CrucibleRecipes.java
-        // 配方字段：
-        // public static CrucibleRecipe recipeXxx; （单条）
-        // 或 CrucibleRecipes.crucibleRecipes （List）
-        //
-        // 研究页写法（单配方）：
-        // new ResearchPage(CrucibleRecipes.recipeXxx)
-        //
-        // 研究页写法（List 取第 0 个）：
-        // new ResearchPage(CrucibleRecipes.crucibleRecipes.get(0))
-        //
-        // 研究页写法（List 全部塞一页）：
-        // new ResearchPage(
-        // CrucibleRecipes.crucibleRecipes.toArray(new CrucibleRecipe[0]))
-        //
-        // 完整节点示例：
-        // new ResearchItem(
-        // "THAUMICSURVIVAL_XXX",
-        // "THAUMICSURVIVAL",
-        // TCAspects.of(TCAspects.MAGIC, 8),
-        // 3, 0, 1,
-        // TCItems.diamond())
-        // .setParents("THAUMICSURVIVAL_MASTER")
-        // .setPages(
-        // TCResearchHelper.textPage("THAUMICSURVIVAL_XXX", 1),
-        // new ResearchPage(CrucibleRecipes.recipeXxx)
-        // )
-        // .registerResearchItem();
-
-        // ============================================================
-        // 【Section 6】文本页（通用，和配方类无关）
-        // ============================================================
-        //
-        // 文本页只显示文字，不绑配方。
-        // 每个研究节点都可以有文本页，放在配方页前面或后面。
-        //
-        // 用法：
-        // TCResearchHelper.textPage("你的研究KEY", 1)
-        //
-        // 语言文件 key：
-        // tc.research_page.你的研究KEY.1=第一页文字
-        // tc.research_page.你的研究KEY.2=第二页文字
-        //
-        // 注意：
-        // 字符串里只写 key，中文写在语言文件里。
-        // 语言文件里用 <BR> 换行，不是 \n。
-
-        // ============================================================
-        // 【Section 7】研究节点注册参数（通用）
-        // ============================================================
-        //
-        // 每个节点都走这个模板，按配方类选 setPages 的内容。
-        //
-        // new ResearchItem(
-        // "研究KEY", // ① 唯一 key
-        // "分类KEY", // ② 你的分类
-        // TCAspects.of(TCAspects.MAGIC, 8), // ③ 连连看要素
-        // x, y, 难度, // ④⑤⑥ 坐标 + 难度(1~3)
-        // TCItems.diamond()) // ⑦ 图标
-        // .setParents("前置KEY") // ⑧ 可见前置（画线）
-        // .setParentsHidden(TCResearchHelper.RESEARCH_INFUSION) // ⑨ 隐藏前置（不画线）
-        // .setSiblings("兄弟KEY") // ⑩ 兄弟节点（并排）
-        // .setPages( // ⑪ 页面，按配方类选
-        // TCResearchHelper.textPage("你的研究KEY", 1),
-        // new ResearchPage(对应配方类的字段或方法)
-        // )
-        // .setConcealed() // ⑫ 前置没完成时隐藏
-        // .setSpecial() // ⑬ 尖刺边框（里程碑）
-        // .setRound() // ⑭ 圆形边框（基础）
-        // .setAutoUnlock() // ⑮ 自动解锁
-        // .setStub() // ⑯ 占位节点
-        // .setSecondary() // ⑰ 次要节点
-        // .registerResearchItem(); // ⑱ 真正注册
-        //
-        // 注意：
-        // 前置 key 拼错不会崩，但节点永远不显示。
-        // 研究 key 必须和配方的第一个参数一致，否则配方不认。
-
-        // ============================================================
-        // 【Section 8】扭曲值（通用）
-        // ============================================================
-        //
-        // 节点注册之后调用：
-        // TCResearchHelper.warp("你的研究KEY", 2);
-        //
-        // 给物品加扭曲：
-        // TCResearchHelper.warpItem(TCItems.diamond(), 1);
-        //
-        // 数字原版一般 1~5。
-
-        // ============================================================
-        // 【Section 9】语言文件 key 规则（通用）
-        // ============================================================
-        //
-        // 节点名字：
-        // tc.research_name.你的研究KEY=节点名字
-        // 节点简介：
-        // tc.research_text.你的研究KEY=节点简介
-        // 文本页：
-        // tc.research_page.你的研究KEY.1=第一页文字
-        // tc.research_page.你的研究KEY.2=第二页文字
-        //
-        // 注意：
-        // key 必须和研究 key 完全一致，大小写敏感。
-        // 换行用 <BR>，不是 \n。
-
+        TCResearchHelper.warp("THAUMICSURVIVAL_OBSIDIAN_TOTEM", 5);
     }
 
-    // =========================================================
-    // 👇 【镜像研究注册入口】 👇
-    // =========================================================
-    // 在 CommonProxy.postInit() 里调用 TSResearchRegistry.postInit()。
-    // 只有到了后初始化阶段，神秘时代才加载完了原版节点，这时候才能开镜子。
-    //
-    // 使用示例（取消注释即可）：
-    //
-    // TCResearchHelper.mirror(
-    // "MIRROR_ELEMENTALPICK", // 新Key
-    // TCResearchHelper.CATEGORY_MY_MOD, // 放到你的分类里
-    // TCResearchHelper.CATEGORY_ARTIFICE, // 原版分类（奥术）
-    // "ELEMENTALPICK", // 原版研究 Key（炽心镐）
-    // 10, 10, // 坐标（别和已有节点重叠）
-    // TCItems.pickElemental()); // 图标
-    //
-    // 注意：
-    // 1. originalCategory 和 originalKey 必须和 ConfigResearch 里一字不差。
-    // 2. 图标必须自己给，镜像不会借原研究的图标。
-    // 3. 原研究不存在时镜像自动隐藏，不崩。
-    // =========================================================
+    // ============================================================
+    // 👇 4. 镜像研究（postInit 阶段）
+    // ============================================================
+    // TODO: 明天把这块代码迁移到独立的研究类里，现在先放在这里。
+    // ============================================================
     public static void postInit() {
-        // 把原版的“注魔”节点，镜像到我们的分类里
+        // 注魔：手动给符文矩阵作为物品图标
         TCResearchHelper.mirror(
-            "MIRROR_INFUSION", // 镜像的新 Key
-            "THAUMICSURVIVAL", // ★ 用你刚改的新常量名
-            TCResearchHelper.CATEGORY_ARTIFICE, // 原版注魔在奥术（ARTIFICE）分类
-            "INFUSION", // 原版研究 Key（注魔）
+            "MIRROR_INFUSION",
+            TCResearchHelper.CATEGORY_THAUMICSURVIVAL,
+            TCResearchHelper.CATEGORY_ARTIFICE,
+            TCResearchHelper.RESEARCH_INFUSION,
             4,
-            -9, // 坐标（找个空地放，比如铁砧旁边）
-            TCBlocks.infusionMatrix() // 图标（用符文矩阵）
-        );
+            -9,
+            TCBlocks.infusionMatrix());
 
+        // 注魔附魔：不传图标，镜子自己照原研究的纹理图标
+        TCResearchHelper.mirror(
+            "MIRROR_INFUSIONENCHANTMENT",
+            TCResearchHelper.CATEGORY_THAUMICSURVIVAL,
+            TCResearchHelper.CATEGORY_ARTIFICE,
+            TCResearchHelper.RESEARCH_INFUSIONENCHANTMENT,
+            -2,
+            -6);
     }
 
+    /*
+     * ============================================================
+     * // TODO: 👇👇👇 【Research API 终极小抄（宝宝都能看懂版）】 👇👇👇
+     * ============================================================
+     * 【一、基础属性（搭骨架）】
+     * Research.of("KEY") 必须写在第一行！KEY 必须和配方里的一字不差。
+     * .category("分类KEY") 极少用，因为默认就是放在咱们的 THAUMICSURVIVAL 里。
+     * .at(x, y) 坐标。原版是 24 像素一格，注意别和别的节点撞车。
+     * .tier(难度) 1~3 正常，4 是究极折磨王（拼图会极其巨大）。
+     * .aspects(AspectList) 连连看消耗的要素。比如 TCAspects.of(TCAspects.MAGIC, 8)。
+     * 【二、图标（脸面）】
+     * .icon(ItemStack) 用物品当图标，比如 .icon(TCBlocks.obsidian())。
+     * .icon(ResourceLocation) 用贴图当图标，比如 .icon(new ResourceLocation("xxx.png"))。
+     * 【三、页面（书里翻的内容）】
+     * .textPages(2) 自动生成纯文本页，比如生成 .1 和 .2 两页。
+     * .pages(ResearchPage...) 手动塞页面，比如 .pages(new ResearchPage(配方))。
+     * 【四、高级页面黑科技】
+     * .aspectsPage(AspectList) 专门展示一堆要素图标的页面（适合做纯文字说明）。
+     * .smeltingPage(ItemStack) 自动去查熔炉配方，画出“A烧成B”的页面。
+     * .multiblock(recipe...) 多方块展示页，传 ShapedArcaneRecipe，从下往上传，内部自动反转！
+     * 【五、前置与关联（怎么解锁）】
+     * .parents("KEY1", "KEY2") 可见前置：必须解锁这些，才能看到它，并且会画连线。
+     * .parentsHidden("KEY") 隐藏前置：必须解锁它，但是不画连线（防止连线太乱）。
+     * .siblings("KEY") 兄弟节点：和谁是一起解锁的，会并排显示。
+     * 【六、状态开关（加特效）】
+     * .round() 圆形边框（适合基础被动、无需合成）。
+     * .special() 带刺六边形边框（适合终极科技、危险黑暗魔法）。
+     * .concealed() 隐藏轮廓（前置没解锁时，连灰色影子都不显示）。
+     * .secondary() 次要节点（允许玩家花研究点直接买通，不用拼图）。
+     * .autoUnlock() 进游戏直接送给玩家（通常只给根节点用）。
+     * .stub() 空壳存根（没有页面，没有内容，纯占位用）。
+     * 【七、终极冷门隐藏开关】
+     * .hidden() 彻底隐身：必须靠扫描物品/实体/要素才能点亮。
+     * .lost() 失落节点：没点亮前显示为乱码，点亮才显示真名。
+     * .virtual() 完全隐形：玩家根本看不见它！常用于纯后台解锁配方。
+     * 【八、触发器（配合 hidden 和 lost 使用）】
+     * .itemTriggers(stack...) 扫描指定物品才会解锁（探险必用）。
+     * .entityTriggers("名字") 扫描指定实体才解锁（比如 "Zombie"）。
+     * .aspectTriggers(Aspect...) 扫描指定要素才解锁（比如 TCAspects.FIRE）。
+     * 【九、最后一步】
+     * .build(); 必须加在链式调用的最后！不写这个等于白写！
+     * ============================================================
+     * ⚠️ 【避坑指南】
+     * 1. 研究 KEY 绝对不能和原版或其他模组撞车，否则原版的会被覆盖。
+     * 2. 如果两个节点坐标重叠，A 哥的底层会直接报红字错误并拒绝注册第二个节点！
+     * 3. 如果用了 .virtual() 隐形开关，就可以无视坐标重叠，随便塞。
+     * ============================================================
+     */
 }
